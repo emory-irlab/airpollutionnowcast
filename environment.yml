@@ -1,0 +1,14 @@
+dependencies:
+ - python=3.6
+ - numpy
+ - scipy
+ - scikit-learn
+ - jupyter
+ - pandas
+ - click
+ - pip:
+   - pytest
+   - configparser
+   - watermark
+   - matplotlib
+   - -r file:requirements.txt
