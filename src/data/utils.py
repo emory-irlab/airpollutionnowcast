@@ -192,6 +192,19 @@ Utils for extract_search_trend.py
 
 def extract_single_city_data(select_columns, single_file_path, trend_data):
     trend_data = trend_data[select_columns]
+    # replace those smaller than 0.1 as nan
+    log_df = trend_data.copy()
+    log_df = log_df.apply(lambda x: np.where(x < 0.1, [np.nan for k in range(len(x))], x))
+
+    # remove most NA columns
+    drop_constant_name = list(log_df.loc[:, log_df.count() < 18].columns)
+    # drop same values all time terms
+    drop_constant_name.extend(list(log_df.loc[:, log_df.std() < 2].columns))
+    if len(drop_constant_name) != 0:
+        print('========Drop Most NAs========')
+        print(drop_constant_name)
+
+    trend_data = trend_data.drop(set(drop_constant_name), axis=1)
     trend_data.to_csv(single_file_path)
 
 

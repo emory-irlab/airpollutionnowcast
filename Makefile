@@ -99,7 +99,6 @@ clean:
 	rm -f models/interim/*.h5
 	rm -f reports/*.csv
 	rm -f reports/*.ini
-	rm -rf config/logging/*
 
 
 
