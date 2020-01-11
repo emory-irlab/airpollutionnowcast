@@ -15,6 +15,7 @@ import click
 import ast
 import pandas as pd
 import os
+
 sys.path.append('.')
 from src.data.utils import read_raw_data, select_years
 
@@ -36,11 +37,16 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     train_years = ast.literal_eval(pars['global']['train_year'])
     valid_years = ast.literal_eval(pars['global']['valid_year'])
     test_years = ast.literal_eval(pars['global']['test_year'])
+    # seed word list
+    seed_path = pars['extract_search_trend']['term_list_path']
+    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
+    seed_word_list.append('DATE')
 
     input_single_file_name = '_' + os.path.basename(merged_file_path)
 
     # concatenate the train and valid data
-    x_train_all, x_valid_all, x_test_all = pd.DataFrame(),  pd.DataFrame(), pd.DataFrame()
+    x_train_all, x_valid_all, x_test_all = pd.DataFrame(columns=seed_word_list),\
+                                           pd.DataFrame(columns=seed_word_list), pd.DataFrame(columns=seed_word_list)
 
     for city in city_list:
         input_single_file_path = os.path.join(os.path.dirname(merged_file_path), city + input_single_file_name)
@@ -61,6 +67,7 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     x_train_all.to_csv(train_data_path, index=False)
     x_valid_all.to_csv(valid_data_path, index=False)
     x_test_all.to_csv(test_data_path, index=False)
+
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
