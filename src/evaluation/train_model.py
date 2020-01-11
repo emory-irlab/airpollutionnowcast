@@ -2,6 +2,7 @@ import configparser
 import logging
 import os
 import sys
+from configparser import ExtendedInterpolation
 
 import click
 
@@ -20,7 +21,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
     logger = logging.getLogger(__name__)
     logger.info('train model from training data')
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     seq_length = int(pars['train_model']['seq_length'])
