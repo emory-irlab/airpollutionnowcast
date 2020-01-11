@@ -36,13 +36,14 @@ create_environment:
 ifeq (True,$(HAS_CONDA))
 	@echo ">>> Detected conda, creating conda environment."
 	conda env create -f environment.yml --name $(PROJECT_NAME)
-	source activate $(PROJECT_NAME)
+	conda activate $(PROJECT_NAME)
 else
 	@echo ">>> CONDA NEEDED TO CREATE ENVIRONMENT"
 endif
 
 ## Test python environment is setup correctly
 test_environment:
+	conda activate $(PROJECT_NAME)
 	$(PYTHON_INTERPRETER) test_environment.py
 
 ## Install Python Dependencies
