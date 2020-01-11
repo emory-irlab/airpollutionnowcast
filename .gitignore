@@ -90,3 +90,6 @@ target/
 
 # model weights
 /models/**/*.h5
+
+# parameter files
+*.ini
