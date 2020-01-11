@@ -6,7 +6,8 @@ import sys
 import click
 
 sys.path.append('.')
-from src.evaluation.utils import process_features, get_rf_model, get_two_branch_feature, get_lstm_model
+from src.evaluation.utils import process_features, get_rf_model, get_two_branch_feature, get_lstm_model,\
+    get_model_from_config, get_feature_from_config
 from src.features.build_features import get_feature_array
 
 
@@ -30,15 +31,10 @@ def extract_file(config_path, train_data_path, valid_data_path):
     y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
     y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
 
-    if model_type == 'rf':
-        x_train, _ = get_feature_array([train_pol, train_phys, train_trend], seq_length)
-        x_valid, _ = get_feature_array([valid_pol, valid_phys, valid_trend], seq_length)
-        model = get_rf_model(pars)
-    elif model_type == 'lstm':
-        x_train, embedding_dim = get_two_branch_feature(train_pol, train_phys, train_trend, seq_length)
-        x_valid, _ = get_two_branch_feature(valid_pol, valid_phys, valid_trend, seq_length)
+    x_train, embedding_dim = get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length)
+    x_valid, _ = get_feature_from_config(pars, model_type, valid_pol, valid_phys, valid_trend, seq_length)
 
-        model = get_lstm_model(pars, seq_length, embedding_dim)
+    model = get_model_from_config(pars, model_type, embedding_dim)
 
     # build model
     model.build_model()

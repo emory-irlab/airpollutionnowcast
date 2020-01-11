@@ -7,7 +7,7 @@ import os
 
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_array, get_rf_model,\
-  get_two_branch_feature, get_lstm_model
+  get_two_branch_feature, get_lstm_model, get_feature_from_config, get_model_from_config
 
 
 @click.command()
@@ -30,12 +30,8 @@ def extract_file(config_path, test_data_path):
 
     y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
 
-    if model_type == 'rf':
-        x_test, _ = get_feature_array([test_pol, test_phys, test_trend], seq_length)
-        model = get_rf_model(pars)
-    elif model_type == 'lstm':
-        x_test, embedding_dim = get_two_branch_feature(test_pol, test_phys, test_trend, seq_length)
-        model = get_lstm_model(pars, seq_length, embedding_dim)
+    x_test, embedding_dim = get_feature_from_config(pars, model_type, test_pol, test_phys, test_trend, seq_length)
+    model = get_model_from_config(pars, model_type, embedding_dim)
 
     # build model
     model.build_model()

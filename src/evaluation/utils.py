@@ -53,7 +53,8 @@ def get_two_branch_feature(train_pol, train_phys, train_trend, seq_length):
     return x_train, embedding
 
 
-def get_lstm_model(pars, seq_length, embedding_dim):
+def get_lstm_model(pars, embedding_dim):
+    seq_length = int(pars['train_model']['seq_length'])
     learning_rate = float(pars['train_model']['learning_rate'])
     batch_size = int(pars['train_model']['batch_size'])
     patience = int(pars['train_model']['patience'])
@@ -63,6 +64,28 @@ def get_lstm_model(pars, seq_length, embedding_dim):
 
     model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
     return model
+
+
+def get_model_from_config(pars, model_type, embedding_dim):
+    if model_type == 'rf':
+        model = get_rf_model(pars)
+    elif model_type == 'lstm':
+        model = get_lstm_model(pars, embedding_dim)
+    return model
+
+
+def get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length):
+    if model_type == 'rf':
+        x_train, embedding_dim = get_feature_array([train_pol, train_phys, train_trend], seq_length)
+    elif model_type == 'lstm':
+        two_branch = pars['train_model'].getboolean('two_branch')
+        if two_branch:
+            x_train, embedding_dim = get_two_branch_feature(train_pol, train_phys, train_trend, seq_length)
+        else:
+            feature_input = pars['train_model']['FEATURE']
+            if feature_input == 'pol-phys':
+                x_train, embedding_dim = get_feature_array([train_pol, train_phys], seq_length)
+    return x_train, embedding_dim
 
 
 """
