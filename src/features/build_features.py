@@ -62,6 +62,9 @@ def lag_search_features(input_df, lag):
         shape: N*M
         for day i, we have the info of day i+lag (later)
     """
+    # remove NAs for input_df with small values
+    input_df = input_df.apply(lambda x:
+                                np.where(x.isnull(), [rnd() for k in range(len(x))], x))
     input_df = np.array(input_df)
     embedding_dim = input_df.shape[1]
     reveserse_embeddings = input_df[::-1]

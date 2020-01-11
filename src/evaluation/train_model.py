@@ -1,14 +1,12 @@
 import configparser
 import logging
+import os
 import sys
 
 import click
-import os
+
 sys.path.append('.')
-from src.models.rf import RandomForestModel
-from src.models.composed_lstm import ComposedLSTM
 from src.evaluation.utils import process_features, get_rf_model, get_two_branch_feature, get_lstm_model
-import ast
 from src.features.build_features import get_feature_array
 
 
