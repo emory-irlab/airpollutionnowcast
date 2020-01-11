@@ -150,12 +150,12 @@ def common_selection(abs_data_path, input_file_path, name_pattern, city, season,
 
 
 # a shared function for extract information from raw data
-def extract_from_raw_data(city_list, select_columns, output_filepath, abs_data_path, search_data_path, name_pattern,
+def extract_from_raw_data(city_list, raw_select_columns, output_filepath, abs_data_path, search_data_path, name_pattern,
                           season, years):
     """
 
     :param city_list:
-    :param select_columns:
+    :param raw_select_columns:
     :param output_filepath:
     :param abs_data_path:
     :param search_data_path:
@@ -167,16 +167,18 @@ def extract_from_raw_data(city_list, select_columns, output_filepath, abs_data_p
 
     single_file_name = '_' + os.path.basename(output_filepath)
 
+    # if select columns not list
+    if not isinstance(raw_select_columns, list):
+        # Get seed_word_list
+        seed_word_list = [k.lower() for k in pd.read_csv(raw_select_columns, header=None)[0].values]
+
     for city in city_list:
         single_file_path = os.path.join(os.path.dirname(output_filepath), city + single_file_name)
-
         trend_data = common_selection(abs_data_path, search_data_path, name_pattern, city, season, years)
-
-        # if select columns not list
-        if not isinstance(select_columns, list):
-            # Get seed_word_list
-            seed_word_list = [k.lower() for k in pd.read_csv(select_columns, header=None)[0].values]
+        if not isinstance(raw_select_columns, list):
             select_columns = get_common_terms(trend_data, seed_word_list)
+        else:
+            select_columns = raw_select_columns[:]
 
         extract_single_city_data(select_columns, single_file_path, trend_data)
     # create search.csv to check existence
