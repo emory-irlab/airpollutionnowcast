@@ -41,6 +41,9 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     seed_path = pars['extract_search_trend']['term_list_path']
     seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
     seed_word_list.append('DATE')
+    # pol label list
+    label_columns = ast.literal_eval(pars['extract_pol_label']['y_column_name'])
+    seed_word_list = label_columns + seed_word_list
 
     input_single_file_name = '_' + os.path.basename(merged_file_path)
 
@@ -62,6 +65,11 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
         x_valid_all = pd.concat([x_valid_all, valid_data], ignore_index=True, sort=False)
         x_test_all = pd.concat([x_test_all, test_data], ignore_index=True, sort=False)
+
+    # drop all NAs columns
+    x_train_all.dropna(axis=1, how='all', inplace=True)
+    x_valid_all.dropna(axis=1, how='all', inplace=True)
+    x_test_all.dropna(axis=1, how='all', inplace=True)
 
     # create train.csv, test.csv to check existence
     x_train_all.to_csv(train_data_path, index=False)
