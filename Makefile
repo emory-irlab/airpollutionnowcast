@@ -84,7 +84,7 @@ train_model: data/processed/train.csv
 	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH)
 
 ## predict and get report
-predict_model: train_model
+predict_model: 
 	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
 
 ## Delete all compiled Python files
