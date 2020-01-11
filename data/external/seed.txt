@@ -3,3 +3,67 @@ headache
 smoke
 cough
 chest pain
+lung cancer
+traffic
+COPD
+code red
+haze
+shortness of breath
+inhaler
+air pollution
+coughing
+respiratory infection
+smog
+power plants
+lung disease
+arrhythmia
+code orange
+sulfate
+no2
+heart murmur
+chest tightness
+cardiovascular disease
+irregular heartbeat
+O3
+snoring
+tailpipe
+organic carbon
+nitrogen dioxide
+Rapid heart rate
+asthma
+rapid breathing
+inhaler use
+bronchitis
+difficulty breathing
+soot
+throat irritation
+chronic obstructive pulmonary disease
+wheezing
+air pollutant
+wildfires
+respiratory illness
+premature death
+bronchiolitis
+black carbon
+smoggy
+asthma attack
+particulate matter
+pm2.5
+air pollution alert
+childhood asthma
+elemental carbon
+fine inhalable particles
+fine particles
+fine particulates
+industrial pollution
+lung irritation
+n02
+nitrogen oxides
+oxides of nitrogen
+traffic emission
+particle pollution
+particulate matter pollution
+pediatric asthma
+pm5
+rapid pulse
+traffic exposure
