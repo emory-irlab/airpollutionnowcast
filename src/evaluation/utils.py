@@ -16,6 +16,7 @@ import pandas as pd
 from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score
 from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
+from src.models.lstm import LSTMModel
 import ast
 
 
@@ -62,7 +63,11 @@ def get_lstm_model(pars, embedding_dim):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
 
-    model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
+    two_branch = pars['train_model'].getboolean('two_branch')
+    if two_branch:
+        model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
+    else:
+        model = LSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
     return model
 
 

@@ -93,3 +93,7 @@ target/
 
 # parameter files
 *.ini
+
+# logging
+config/logging/*
+reports/*
