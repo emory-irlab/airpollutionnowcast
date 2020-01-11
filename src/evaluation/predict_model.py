@@ -13,7 +13,7 @@ from src.evaluation.utils import process_features, result_stat, write_report, ge
 @click.command()
 @click.argument('config_path', type=click.Path(exists=True))
 @click.argument('test_data_path', type=click.Path(exists=True))
-def extract_file(config_path, test_data_path, report_path):
+def extract_file(config_path, test_data_path):
     logger = logging.getLogger(__name__)
     logger.info('predict the testing data')
 
@@ -25,6 +25,8 @@ def extract_file(config_path, test_data_path, report_path):
     # parameters for rf model
     model_path = pars['train_model']['save_model_path']
     model_type = pars['train_model']['model_type']
+    # report path
+    report_path = pars['predict_model']['report_path']
 
     y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
 
