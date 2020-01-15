@@ -5,6 +5,7 @@ from configparser import ExtendedInterpolation
 
 import click
 import os
+import pickle
 
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_array, get_rf_model,\
@@ -28,8 +29,18 @@ def extract_file(config_path, test_data_path):
     model_type = pars['train_model']['model_type']
     # report path
     report_path = pars['predict_model']['report_path']
+    # save input_data_path for dllstm model
+    pars['DLLSTM']['input_data_path'] = test_data_path
 
     y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+
+    # design for dllstm model
+    if model_type == 'dllstm':
+        # get common terms
+        current_word_path = pars['DLLSTM']['current_word_path']
+        with open(current_word_path, 'rb') as f:
+            common_terms = pickle.load(f)
+        test_trend = test_trend[common_terms]
 
     x_test, embedding_dim = get_feature_from_config(pars, model_type, test_pol, test_phys, test_trend, seq_length)
     model = get_model_from_config(pars, model_type, embedding_dim)

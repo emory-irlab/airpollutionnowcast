@@ -5,10 +5,11 @@ import sys
 from configparser import ExtendedInterpolation
 
 import click
+import pickle
 
 sys.path.append('.')
 from src.evaluation.utils import process_features, get_rf_model, get_two_branch_feature, get_lstm_model,\
-    get_model_from_config, get_feature_from_config
+    get_model_from_config, get_feature_from_config, generate_dllstm_filtered_dict
 from src.features.build_features import get_feature_array
 
 
@@ -28,9 +29,24 @@ def extract_file(config_path, train_data_path, valid_data_path):
     search_lag = int(pars['train_model']['search_lag'])
     model_type = pars['train_model']['model_type']
     save_model_path = pars['train_model']['save_model_path']
+    # save input_data_path for dllstm model
+    pars['DLLSTM']['input_data_path'] = valid_data_path
 
     y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
     y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
+
+    # design for dllstm model
+    if model_type == 'dllstm':
+        # check for filtered_dict_path
+        filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
+        # get common terms
+        current_word_path = pars['DLLSTM']['current_word_path']
+        if not os.path.exists(filtered_dict_path):
+            generate_dllstm_filtered_dict(pars)
+        with open(current_word_path, 'rb') as f:
+            common_terms = pickle.load(f)
+        train_trend = train_trend[common_terms]
+        valid_trend = valid_trend[common_terms]
 
     x_train, embedding_dim = get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length)
     x_valid, _ = get_feature_from_config(pars, model_type, valid_pol, valid_phys, valid_trend, seq_length)

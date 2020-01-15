@@ -42,7 +42,7 @@ class DLLSTMModel(LSTMModel):
 
     def fit(self, x_train, x_valid, y_train, y_valid):
         
-        glove_embedding = get_glove_and_intent()
+        glove_embedding = get_glove_and_intent(None,None,None)
         glove_embedding_tr = np.tile(glove_embedding, (x_train.shape[0],1 , 1))
         glove_embedding_vl = np.tile(glove_embedding, (x_valid.shape[0],1 , 1))
         glove_embedding_trvl = np.tile(glove_embedding, (x_valid.shape[0] + x_train.shape[0],1 , 1))
@@ -93,7 +93,7 @@ class DLLSTMModel(LSTMModel):
                        epochs=epochs, class_weight=class_weight, verbose=1)
 
     def predict(self, x_test):
-        glove_embedding = get_glove_and_intent()
+        glove_embedding = get_glove_and_intent(None,None,None)
         glove_embedding_ts = np.tile(glove_embedding, (x_test.shape[0],1 , 1))
         pred_score = self.model.predict((glove_embedding_ts, x_test))
         pred_class = [0 if i < 0.5 else 1 for i in pred_score]

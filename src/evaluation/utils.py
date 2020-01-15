@@ -7,6 +7,7 @@
 
 import sys
 import os
+import pickle
 
 sys.path.append('.')
 from src.data import read_raw_data
@@ -17,6 +18,7 @@ from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy
 from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
+from src.models.dict_learner_sensor import DLLSTMModel
 import ast
 
 
@@ -54,7 +56,7 @@ def get_two_branch_feature(train_pol, train_phys, train_trend, seq_length):
     return x_train, embedding
 
 
-def get_lstm_model(pars, embedding_dim):
+def get_lstm_model(pars, embedding_dim, model_type):
     seq_length = int(pars['train_model']['seq_length'])
     learning_rate = float(pars['train_model']['learning_rate'])
     batch_size = int(pars['train_model']['batch_size'])
@@ -62,27 +64,31 @@ def get_lstm_model(pars, embedding_dim):
     log_dir = pars['train_model']['log_dir']
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-
     two_branch = pars['train_model'].getboolean('two_branch')
-    if two_branch:
-        model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
-    else:
+    if not two_branch:
         model = LSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
+    else:
+        if model_type == 'lstm':
+            model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
+        elif model_type == 'dllstm':
+            model = DLLSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
+            # save necessary dict path for dllstm model
+            model.get_glove_and_intent_path(pars)
     return model
 
 
 def get_model_from_config(pars, model_type, embedding_dim):
     if model_type == 'rf':
         model = get_rf_model(pars)
-    elif model_type == 'lstm':
-        model = get_lstm_model(pars, embedding_dim)
+    elif model_type in ['lstm', 'dllstm']:
+        model = get_lstm_model(pars, embedding_dim, model_type)
     return model
 
 
 def get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length):
     if model_type == 'rf':
         x_train, embedding_dim = get_feature_array([train_pol, train_phys, train_trend], seq_length)
-    elif model_type == 'lstm':
+    elif model_type in ['lstm', 'dllstm']:
         two_branch = pars['train_model'].getboolean('two_branch')
         if two_branch:
             x_train, embedding_dim = get_two_branch_feature(train_pol, train_phys, train_trend, seq_length)
@@ -114,8 +120,49 @@ def result_stat(y_true, y_prediction, pred_score):
 
     return accuracy, f1_value, tp, fp, tn, fn, auc_value
 
+
 # right result to report file
 def write_report(result_scores):
     record_pd = pd.DataFrame(np.array(result_scores).reshape(1, -1), columns=RECORD_COLUMNS)
     return record_pd
+
+
+"""
+Function for DLLSTM
+"""
+
+
+def generate_dllstm_filtered_dict(pars):
+    # get common terms
+    current_word_path = pars['DLLSTM']['current_word_path']
+    # check for filtered_dict_path
+    filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
+    search_terms_dict_path = pars['DLLSTM']['search_terms_dict_path']
+    seed_word_path = pars['DLLSTM']['seed_word_path']
+    input_data_path = pars['DLLSTM']['input_data_path']
+    search_volume_df = read_raw_data(input_data_path)
+    with open(search_terms_dict_path, 'rb') as f:
+        a = pickle.load(f)
+    SEED = True
+    if SEED:
+        seed_word_path = seed_word_path
+        seed_word_list = [k.lower() for k in pd.read_csv(seed_word_path, header=None)[0].values]
+        terms = []
+        for c in seed_word_list:
+            if c in a.keys() and c in search_volume_df.columns:
+                terms.append(c)
+    else:
+        terms = []
+        for c in a.keys():
+            if c in search_volume_df.columns:
+                terms.append(c)
+    # print(search_volume_df.shape, len(terms))
+    # Store a dictionary of terms currently in use and their glove embeddings.
+    terms = list(set(terms))
+    with open(filtered_dict_path, 'wb') as f:
+        pickle.dump({k: a[k] for k in terms}, f)
+    with open(current_word_path, 'wb') as f:
+        pickle.dump(terms, f)
+
+
 

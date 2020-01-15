@@ -42,10 +42,15 @@ class DLLSTMModel(LSTMModel):
         model = keras_Model(inputs=[glove_embedding_input, sensor_input, search_input], outputs=out)
         return model
 
+    def get_glove_and_intent_path(self, pars):
+        self.intent_dict_path = pars['DLLSTM']['intent_dict_path']
+        self.filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
+        self.current_word_path = pars['DLLSTM']['current_word_path']
+
     def fit(self, x_train, x_valid, y_train, y_valid):
         FT = False 
 
-        glove_embedding = get_glove_and_intent()
+        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
         glove_embedding_tr = np.tile(glove_embedding, (x_train[0].shape[0],1 , 1))
         glove_embedding_vl = np.tile(glove_embedding, (x_valid[0].shape[0],1 , 1))
         glove_embedding_trvl = np.tile(glove_embedding, (x_valid[0].shape[0] + x_train[0].shape[0],1 , 1))
@@ -98,7 +103,7 @@ class DLLSTMModel(LSTMModel):
                        epochs=epochs, class_weight=class_weight, verbose=1)
     
     def predict(self, x_test):
-        glove_embedding = get_glove_and_intent()
+        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
         glove_embedding_ts = np.tile(glove_embedding, (x_test[0].shape[0],1 , 1))
         pred_score = self.model.predict((glove_embedding_ts,) + tuple(x_test))
         pred_class = [0 if i < 0.5 else 1 for i in pred_score]

@@ -58,13 +58,15 @@ def lag_search_features(input_df, lag):
         M: number of search terms
     :param lag: int
         lag of days applied ont search data
-    :return: np.array
+    :return: pd.DataFrame
         shape: N*M
         for day i, we have the info of day i+lag (later)
     """
     # remove NAs for input_df with small values
     input_df = input_df.apply(lambda x:
                                 np.where(x.isnull(), [rnd() for k in range(len(x))], x))
+    # record column names
+    df_column_names = input_df.columns
     input_df = np.array(input_df)
     embedding_dim = input_df.shape[1]
     reveserse_embeddings = input_df[::-1]
@@ -73,7 +75,7 @@ def lag_search_features(input_df, lag):
         na_embedding = np.array([rnd() for k in range(embedding_dim)])
         lag_features[i] = na_embedding
     lag_features = lag_features[::-1]
-    return lag_features
+    return pd.DataFrame(lag_features, columns=df_column_names)
 
 # generate sequence input features for LSTM training
 def generate_input_sequence(input_array, seq_length):
