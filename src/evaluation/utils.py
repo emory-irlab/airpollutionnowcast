@@ -87,14 +87,19 @@ def get_model_from_config(pars, model_type, embedding_dim):
 
 
 def get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length):
+    is_two_branch = False
     if model_type in ['lstm', 'dllstm']:
         two_branch = pars['train_model'].getboolean('two_branch')
         if two_branch:
-            first_branch = ast.literal_eval(pars['train_model']['first_branch'])
-            second_branch = ast.literal_eval(pars['train_model']['second_branch'])
-            first_feature = get_feature_from_code(first_branch, train_pol, train_phys, train_trend)
-            second_feature = get_feature_from_code(second_branch, train_pol, train_phys, train_trend)
-            x_train, embedding_dim = get_two_branch_feature(seq_length, first_feature, second_feature)
+            is_two_branch = True
+    else:
+        is_two_branch = False
+    if is_two_branch:
+        first_branch = ast.literal_eval(pars['train_model']['first_branch'])
+        second_branch = ast.literal_eval(pars['train_model']['second_branch'])
+        first_feature = get_feature_from_code(first_branch, train_pol, train_phys, train_trend)
+        second_feature = get_feature_from_code(second_branch, train_pol, train_phys, train_trend)
+        x_train, embedding_dim = get_two_branch_feature(seq_length, first_feature, second_feature)
     else:
         code_feature: List[int] = ast.literal_eval(pars['train_model']['code_feature'])
         feature_list = get_feature_from_code(code_feature, train_pol, train_phys, train_trend)
