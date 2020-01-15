@@ -1,17 +1,14 @@
 import configparser
 import logging
 import os
+import pickle
 import sys
 from configparser import ExtendedInterpolation
 
 import click
-import pickle
 
 sys.path.append('.')
-from src.evaluation.utils import process_features, get_rf_model, get_two_branch_feature, get_lstm_model,\
-    get_model_from_config, get_feature_from_config, generate_dllstm_filtered_dict
-from src.features.build_features import get_feature_array
-
+from src.evaluation.utils import process_features, get_model_from_config, get_feature_from_config, generate_dllstm_filtered_dict
 
 
 @click.command()
@@ -41,7 +38,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
         filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
         # get common terms
         current_word_path = pars['DLLSTM']['current_word_path']
-        if not os.path.exists(filtered_dict_path):
+        if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
             generate_dllstm_filtered_dict(pars)
         with open(current_word_path, 'rb') as f:
             common_terms = pickle.load(f)

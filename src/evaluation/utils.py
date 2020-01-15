@@ -8,6 +8,7 @@
 import sys
 import os
 import pickle
+from typing import Set, Dict, List, Any, Union, Tuple
 
 sys.path.append('.')
 from src.data import read_raw_data
@@ -47,9 +48,9 @@ def get_rf_model(pars):
     return model
 
 
-def get_two_branch_feature(train_pol, train_phys, train_trend, seq_length):
-    x_train_sensor, embedding_sensor = get_feature_array([train_pol, train_phys], seq_length)
-    x_train_trend, embedding_trend = get_feature_array([train_trend], seq_length)
+def get_two_branch_feature(seq_length, first_branch, second_branch):
+    x_train_sensor, embedding_sensor = get_feature_array(first_branch, seq_length)
+    x_train_trend, embedding_trend = get_feature_array(second_branch, seq_length)
 
     x_train = (x_train_sensor, x_train_trend)
     embedding = (embedding_sensor, embedding_trend)
@@ -86,17 +87,41 @@ def get_model_from_config(pars, model_type, embedding_dim):
 
 
 def get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length):
-    if model_type == 'rf':
-        x_train, embedding_dim = get_feature_array([train_pol, train_phys, train_trend], seq_length)
-    elif model_type in ['lstm', 'dllstm']:
+    if model_type in ['lstm', 'dllstm']:
         two_branch = pars['train_model'].getboolean('two_branch')
         if two_branch:
-            x_train, embedding_dim = get_two_branch_feature(train_pol, train_phys, train_trend, seq_length)
-        else:
-            feature_input = pars['train_model']['FEATURE']
-            if feature_input == 'pol-phys':
-                x_train, embedding_dim = get_feature_array([train_pol, train_phys], seq_length)
+            first_branch = ast.literal_eval(pars['train_model']['first_branch'])
+            second_branch = ast.literal_eval(pars['train_model']['second_branch'])
+            first_feature = get_feature_from_code(first_branch, train_pol, train_phys, train_trend)
+            second_feature = get_feature_from_code(second_branch, train_pol, train_phys, train_trend)
+            x_train, embedding_dim = get_two_branch_feature(seq_length, first_feature, second_feature)
+    else:
+        code_feature: List[int] = ast.literal_eval(pars['train_model']['code_feature'])
+        feature_list = get_feature_from_code(code_feature, train_pol, train_phys, train_trend)
+        x_train, embedding_dim = get_feature_array(feature_list, seq_length)
     return x_train, embedding_dim
+
+
+def get_feature_from_code(feature_code, train_pol, train_phys, train_trend):
+    """
+
+    :param feature_code: list(int0
+        shape: 3 (pol, phys, trend0
+        0 for not including, 1 for including
+    :param train_pol:
+    :param train_phys:
+    :param train_trend:
+    :return: list(np.array)
+    """
+    output_feature = []
+    list_feature = [train_pol, train_phys, train_trend]
+
+    for i in range(3):
+        if feature_code[i] == 1:
+            output_feature.append(list_feature[i])
+
+    return output_feature
+
 
 
 """
