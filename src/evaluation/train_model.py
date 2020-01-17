@@ -1,14 +1,15 @@
+import ast
 import configparser
 import logging
 import os
-import pickle
 import sys
 from configparser import ExtendedInterpolation
 
 import click
 
 sys.path.append('.')
-from src.evaluation.utils import process_features, get_model_from_config, get_feature_from_config, generate_dllstm_filtered_dict
+from src.evaluation.utils import process_features, get_model_from_config, get_feature_from_config, \
+    get_feature_pars, if_create_filtered_dict
 
 
 @click.command()
@@ -22,41 +23,36 @@ def extract_file(config_path, train_data_path, valid_data_path):
     pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
+    # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
     model_type = pars['train_model']['model_type']
-    save_model_path = pars['train_model']['save_model_path']
-    # save input_data_path for dllstm model
-    pars['DLLSTM']['input_data_path'] = valid_data_path
+    features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    # get feature_pars dict
+    for index in range(0, len(features_array)):
+        feature_pars = get_feature_pars(pars, index)
+        # save input_data_path for dllstm model
+        feature_pars['input_data_path'] = valid_data_path
 
-    y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
-    y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
+        y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
+        y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
 
-    # design for dllstm model
-    if model_type == 'dllstm':
-        # check for filtered_dict_path
-        filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
-        # get common terms
-        current_word_path = pars['DLLSTM']['current_word_path']
-        if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
-            generate_dllstm_filtered_dict(pars)
-        with open(current_word_path, 'rb') as f:
-            common_terms = pickle.load(f)
-        train_trend = train_trend[common_terms]
-        valid_trend = valid_trend[common_terms]
+        ## check if dllstm model, create filtered dict
+        train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
 
-    x_train, embedding_dim = get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length)
-    x_valid, _ = get_feature_from_config(pars, model_type, valid_pol, valid_phys, valid_trend, seq_length)
+        x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
+        x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
 
-    model = get_model_from_config(pars, model_type, embedding_dim)
+        model = get_model_from_config(feature_pars, model_type, embedding_dim)
 
-    # build model
-    model.build_model()
-    model.fit(x_train, x_valid, y_train, y_valid)
+        # build model
+        model.build_model()
+        model.fit(x_train, x_valid, y_train, y_valid)
 
-    if not os.path.exists(os.path.dirname(save_model_path)):
-        os.makedirs(os.path.dirname(save_model_path))
-    model.save(save_model_path)
+        save_model_path = feature_pars['save_model_path']
+        if not os.path.exists(os.path.dirname(save_model_path)):
+            os.makedirs(os.path.dirname(save_model_path))
+        model.save(save_model_path)
 
 
 if __name__ == '__main__':

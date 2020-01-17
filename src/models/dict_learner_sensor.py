@@ -43,9 +43,9 @@ class DLLSTMModel(LSTMModel):
         return model
 
     def get_glove_and_intent_path(self, pars):
-        self.intent_dict_path = pars['DLLSTM']['intent_dict_path']
-        self.filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
-        self.current_word_path = pars['DLLSTM']['current_word_path']
+        self.intent_dict_path = pars['intent_dict_path']
+        self.filtered_dict_path = pars['filtered_dict_path']
+        self.current_word_path = pars['current_word_path']
 
     def fit(self, x_train, x_valid, y_train, y_valid):
         FT = False 

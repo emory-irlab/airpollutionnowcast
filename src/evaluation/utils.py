@@ -5,10 +5,10 @@
     Python Version: 3.6
 '''
 
-import sys
 import os
 import pickle
-from typing import Set, Dict, List, Any, Union, Tuple
+import sys
+from typing import List
 
 sys.path.append('.')
 from src.data import read_raw_data
@@ -22,8 +22,7 @@ from src.models.lstm import LSTMModel
 from src.models.dict_learner_sensor import DLLSTMModel
 import ast
 
-
-RECORD_COLUMNS = ['accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
+RECORD_COLUMNS = ['feature', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
                   'false negatives', 'AUC']
 
 
@@ -57,15 +56,15 @@ def get_two_branch_feature(seq_length, first_branch, second_branch):
     return x_train, embedding
 
 
-def get_lstm_model(pars, embedding_dim, model_type):
-    seq_length = int(pars['train_model']['seq_length'])
-    learning_rate = float(pars['train_model']['learning_rate'])
-    batch_size = int(pars['train_model']['batch_size'])
-    patience = int(pars['train_model']['patience'])
-    log_dir = pars['train_model']['log_dir']
+def get_lstm_model(feature_pars, embedding_dim, model_type):
+    seq_length = feature_pars['seq_length']
+    learning_rate = feature_pars['learning_rate']
+    batch_size = feature_pars['batch_size']
+    patience = feature_pars['patience']
+    log_dir = feature_pars['log_dir']
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-    two_branch = pars['train_model'].getboolean('two_branch')
+    two_branch = feature_pars['is_two_branch']
     if not two_branch:
         model = LSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
     else:
@@ -74,34 +73,28 @@ def get_lstm_model(pars, embedding_dim, model_type):
         elif model_type == 'dllstm':
             model = DLLSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
             # save necessary dict path for dllstm model
-            model.get_glove_and_intent_path(pars)
+            model.get_glove_and_intent_path(feature_pars)
     return model
 
 
-def get_model_from_config(pars, model_type, embedding_dim):
+def get_model_from_config(feature_pars, model_type, embedding_dim):
     if model_type == 'rf':
-        model = get_rf_model(pars)
+        model = get_rf_model(feature_pars)
     elif model_type in ['lstm', 'dllstm']:
-        model = get_lstm_model(pars, embedding_dim, model_type)
+        model = get_lstm_model(feature_pars, embedding_dim, model_type)
     return model
 
 
-def get_feature_from_config(pars, model_type, train_pol, train_phys, train_trend, seq_length):
-    is_two_branch = False
-    if model_type in ['lstm', 'dllstm']:
-        two_branch = pars['train_model'].getboolean('two_branch')
-        if two_branch:
-            is_two_branch = True
-    else:
-        is_two_branch = False
+def get_feature_from_config(pars, train_pol, train_phys, train_trend):
+    is_two_branch = pars['is_two_branch']
+    seq_length = pars['seq_length']
+
     if is_two_branch:
-        first_branch = ast.literal_eval(pars['train_model']['first_branch'])
-        second_branch = ast.literal_eval(pars['train_model']['second_branch'])
-        first_feature = get_feature_from_code(first_branch, train_pol, train_phys, train_trend)
-        second_feature = get_feature_from_code(second_branch, train_pol, train_phys, train_trend)
+        first_feature = get_feature_from_code(pars['first_branch'], train_pol, train_phys, train_trend)
+        second_feature = get_feature_from_code(pars['second_branch'], train_pol, train_phys, train_trend)
         x_train, embedding_dim = get_two_branch_feature(seq_length, first_feature, second_feature)
     else:
-        code_feature: List[int] = ast.literal_eval(pars['train_model']['code_feature'])
+        code_feature: List[int] = pars['first_branch']
         feature_list = get_feature_from_code(code_feature, train_pol, train_phys, train_trend)
         x_train, embedding_dim = get_feature_array(feature_list, seq_length)
     return x_train, embedding_dim
@@ -128,10 +121,41 @@ def get_feature_from_code(feature_code, train_pol, train_phys, train_trend):
     return output_feature
 
 
+def get_feature_pars(pars, index):
+    feature_pars = dict()
+    # feature parameters
+    feature_pars['is_two_branch'] = (ast.literal_eval(pars['train_model']['two_branch'])[index] == 'yes')
+    feature_pars['first_branch'] = ast.literal_eval(pars['train_model']['first_branch'])[index]
+    feature_pars['second_branch'] = ast.literal_eval(pars['train_model']['second_branch'])[index]
+    features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    feature_pars['feature'] = features_array[index]
+
+    # path parameters
+    feature_pars['log_dir'] = os.path.join(pars['train_model']['log_dir'], feature_pars['feature'])
+    feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'], feature_pars['feature'] + '.h5')
+    # path for dlstm
+    feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
+    feature_pars['filtered_dict_path'] = pars['DLLSTM']['filtered_dict_path']
+    feature_pars['current_word_path'] = pars['DLLSTM']['current_word_path']
+    feature_pars['search_terms_dict_path'] = pars['DLLSTM']['search_terms_dict_path']
+    feature_pars['seed_word_path'] = pars['DLLSTM']['seed_word_path']
+
+    # model parameters
+    feature_pars['seq_length'] = int(pars['train_model']['search_lag'])
+    feature_pars['search_lag'] = int(pars['train_model']['search_lag'])
+    feature_pars['model_type'] = pars['train_model']['model_type']
+    # model parameters for lstm
+    feature_pars['learning_rate'] = float(pars['train_model']['learning_rate'])
+    feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
+    feature_pars['patience'] = int(pars['train_model']['patience'])
+
+    return feature_pars
+
 
 """
 Utils for predict_model.py
 """
+
 
 # evaluation metrics
 def result_stat(y_true, y_prediction, pred_score):
@@ -148,7 +172,7 @@ def result_stat(y_true, y_prediction, pred_score):
     fpr, tpr, threshold = roc_curve(y_true, pred_score)
     auc_value = auc(fpr, tpr)
 
-    return accuracy, f1_value, tp, fp, tn, fn, auc_value
+    return [accuracy, f1_value, tp, fp, tn, fn, auc_value]
 
 
 # right result to report file
@@ -164,12 +188,12 @@ Function for DLLSTM
 
 def generate_dllstm_filtered_dict(pars):
     # get common terms
-    current_word_path = pars['DLLSTM']['current_word_path']
+    current_word_path = pars['current_word_path']
     # check for filtered_dict_path
-    filtered_dict_path = pars['DLLSTM']['filtered_dict_path']
-    search_terms_dict_path = pars['DLLSTM']['search_terms_dict_path']
-    seed_word_path = pars['DLLSTM']['seed_word_path']
-    input_data_path = pars['DLLSTM']['input_data_path']
+    filtered_dict_path = pars['filtered_dict_path']
+    search_terms_dict_path = pars['search_terms_dict_path']
+    seed_word_path = pars['seed_word_path']
+    input_data_path = pars['input_data_path']
     search_volume_df = read_raw_data(input_data_path)
     with open(search_terms_dict_path, 'rb') as f:
         a = pickle.load(f)
@@ -194,5 +218,22 @@ def generate_dllstm_filtered_dict(pars):
     with open(current_word_path, 'wb') as f:
         pickle.dump(terms, f)
 
+
+def if_create_filtered_dict(feature_pars, train_trend, valid_trend):
+    model_type = feature_pars['model_type']
+
+    if model_type == 'dllstm':
+        # check for filtered_dict_path
+        filtered_dict_path = feature_pars['filtered_dict_path']
+        # get common terms
+        current_word_path = feature_pars['current_word_path']
+        if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
+            generate_dllstm_filtered_dict(feature_pars)
+        with open(current_word_path, 'rb') as f:
+            common_terms = pickle.load(f)
+        train_trend = train_trend[common_terms]
+        valid_trend = valid_trend[common_terms]
+
+    return train_trend, valid_trend
 
 
