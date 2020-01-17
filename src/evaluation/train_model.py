@@ -26,11 +26,12 @@ def extract_file(config_path, train_data_path, valid_data_path):
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
-    model_type = pars['train_model']['model_type']
     features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     # get feature_pars dict
     for index in range(0, len(features_array)):
         feature_pars = get_feature_pars(pars, index)
+        # get model_type
+        model_type = feature_pars['model_type']
         # save input_data_path for dllstm model
         feature_pars['input_data_path'] = valid_data_path
 

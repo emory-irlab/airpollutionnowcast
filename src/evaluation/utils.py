@@ -57,23 +57,29 @@ def get_two_branch_feature(seq_length, first_branch, second_branch):
 
 
 def get_lstm_model(feature_pars, embedding_dim, model_type):
-    seq_length = feature_pars['seq_length']
-    learning_rate = feature_pars['learning_rate']
-    batch_size = feature_pars['batch_size']
-    patience = feature_pars['patience']
+    kwargs = {'seq_length':feature_pars['seq_length'], 'embedding_dim':embedding_dim,
+              'learning_rate':feature_pars['learning_rate'],
+              'batch_size':feature_pars['batch_size'],
+              'patience':feature_pars['patience'],
+              'log_dir':feature_pars['log_dir']}
     log_dir = feature_pars['log_dir']
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     two_branch = feature_pars['is_two_branch']
-    if not two_branch:
-        model = LSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
-    else:
-        if model_type == 'lstm':
-            model = ComposedLSTM(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
-        elif model_type == 'dllstm':
-            model = DLLSTMModel(seq_length, embedding_dim, learning_rate, batch_size, patience, log_dir)
-            # save necessary dict path for dllstm model
-            model.get_glove_and_intent_path(feature_pars)
+
+    if model_type == 'dllstm':
+        if two_branch:
+            model = DLLSTMModel(**kwargs)
+        else:
+            model = None # need to implement trend only DLLSTMModel
+            pass
+        # save necessary dict path for dllstm model
+        model.get_glove_and_intent_path(feature_pars)
+    elif model_type == 'lstm':
+        if two_branch:
+            model = ComposedLSTM(**kwargs)
+        else:
+            model = LSTMModel(**kwargs)
     return model
 
 
@@ -143,7 +149,7 @@ def get_feature_pars(pars, index):
     # model parameters
     feature_pars['seq_length'] = int(pars['train_model']['search_lag'])
     feature_pars['search_lag'] = int(pars['train_model']['search_lag'])
-    feature_pars['model_type'] = pars['train_model']['model_type']
+    feature_pars['model_type'] = ast.literal_eval(pars['train_model']['model_type'])[index]
     # model parameters for lstm
     feature_pars['learning_rate'] = float(pars['train_model']['learning_rate'])
     feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
