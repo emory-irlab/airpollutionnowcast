@@ -58,7 +58,7 @@ def extract_file(config_path, test_data_path):
         pred_class, pred_score = model.predict(x_test)
         result_scores = result_stat(y_test, pred_class, pred_score)
         print(result_scores)
-        result_scores = [feature_pars['feature']] + result_scores
+        result_scores = [model_type, feature_pars['feature']] + result_scores
         record_pd = write_report(result_scores, record_pd, index)
 
     # write results
