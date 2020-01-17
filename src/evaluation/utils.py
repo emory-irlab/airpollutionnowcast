@@ -176,8 +176,8 @@ def result_stat(y_true, y_prediction, pred_score):
 
 
 # right result to report file
-def write_report(result_scores):
-    record_pd = pd.DataFrame(np.array(result_scores).reshape(1, -1), columns=RECORD_COLUMNS)
+def write_report(result_scores, record_pd, index):
+    record_pd.loc[index, RECORD_COLUMNS] = result_scores
     return record_pd
 
 

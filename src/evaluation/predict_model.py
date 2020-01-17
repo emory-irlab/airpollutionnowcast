@@ -7,10 +7,11 @@ import sys
 from configparser import ExtendedInterpolation
 
 import click
+import pandas as pd
 
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config,\
-    get_model_from_config, get_feature_pars
+    get_model_from_config, get_feature_pars, RECORD_COLUMNS
 
 
 @click.command()
@@ -29,6 +30,7 @@ def extract_file(config_path, test_data_path):
     model_type = pars['train_model']['model_type']
     features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     # report path
+    record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
     report_path = pars['predict_model']['report_path']
 
     # get feature_pars dict
@@ -57,16 +59,17 @@ def extract_file(config_path, test_data_path):
         result_scores = result_stat(y_test, pred_class, pred_score)
         print(result_scores)
         result_scores = [feature_pars['feature']] + result_scores
-        record_pd = write_report(result_scores)
+        record_pd = write_report(result_scores, record_pd, index)
 
-        report_pardir = os.path.dirname(report_path)
-        if not os.path.exists(report_pardir):
-            os.makedirs(report_pardir)
-        record_pd.to_csv(report_path, index=False)
-        # save config file
-        save_config_path = os.path.join(report_pardir, 'config.ini')
-        with open(save_config_path, 'w') as configfile:
-            pars.write(configfile)
+    # write results
+    report_pardir = os.path.dirname(report_path)
+    if not os.path.exists(report_pardir):
+        os.makedirs(report_pardir)
+    record_pd.to_csv(report_path, index=False)
+    # save config file
+    save_config_path = os.path.join(report_pardir, 'config.ini')
+    with open(save_config_path, 'w') as configfile:
+        pars.write(configfile)
 
 
 if __name__ == '__main__':
