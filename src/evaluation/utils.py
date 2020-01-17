@@ -136,9 +136,18 @@ def get_feature_pars(pars, index):
     features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     feature_pars['feature'] = features_array[index]
 
+    # model parameters
+    feature_pars['seq_length'] = int(pars['train_model']['search_lag'])
+    feature_pars['search_lag'] = int(pars['train_model']['search_lag'])
+    feature_pars['model_type'] = ast.literal_eval(pars['train_model']['model_type'])[index]
+
     # path parameters
-    feature_pars['log_dir'] = os.path.join(pars['train_model']['log_dir'], feature_pars['feature'])
-    feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'], feature_pars['feature'] + '.h5')
+    feature_pars['log_dir'] = os.path.join(pars['train_model']['log_dir'],
+                                           feature_pars['model_type'] + '-',
+                                           feature_pars['feature'])
+    feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'],
+                                                   feature_pars['model_type'] + '-',
+                                                   feature_pars['feature'] + '.h5')
     # path for dlstm
     feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
     feature_pars['filtered_dict_path'] = pars['DLLSTM']['filtered_dict_path']
@@ -146,10 +155,6 @@ def get_feature_pars(pars, index):
     feature_pars['search_terms_dict_path'] = pars['DLLSTM']['search_terms_dict_path']
     feature_pars['seed_word_path'] = pars['DLLSTM']['seed_word_path']
 
-    # model parameters
-    feature_pars['seq_length'] = int(pars['train_model']['search_lag'])
-    feature_pars['search_lag'] = int(pars['train_model']['search_lag'])
-    feature_pars['model_type'] = ast.literal_eval(pars['train_model']['model_type'])[index]
     # model parameters for lstm
     feature_pars['learning_rate'] = float(pars['train_model']['learning_rate'])
     feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
