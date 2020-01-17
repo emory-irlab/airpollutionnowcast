@@ -33,6 +33,10 @@ def extract_file(config_path, test_data_path):
     record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
     report_path = pars['predict_model']['report_path']
 
+    if os.path.exists(report_path):
+        print("Report File Exist! Change Report Path\n")
+        exit(1)
+
     # get feature_pars dict
     for index in range(0, len(features_array)):
         feature_pars = get_feature_pars(pars, index)
