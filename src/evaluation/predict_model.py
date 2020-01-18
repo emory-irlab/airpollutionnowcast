@@ -10,7 +10,7 @@ import click
 import pandas as pd
 
 sys.path.append('.')
-from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config,\
+from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config, \
     get_model_from_config, get_feature_pars, RECORD_COLUMNS
 
 
@@ -63,7 +63,8 @@ def extract_file(config_path, test_data_path):
         pred_class, pred_score = model.predict(x_test)
         result_scores = result_stat(y_test, pred_class, pred_score)
         print(result_scores)
-        result_scores = [model_type, feature_pars['feature']] + result_scores
+        result_scores = [model_type, feature_pars['feature'], feature_pars['is_two_branch']] + \
+                        result_scores
         record_pd = write_report(result_scores, record_pd, index)
 
     # write results
