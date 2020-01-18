@@ -20,6 +20,7 @@ from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
 from src.models.dict_learner_sensor import ComposedDLLSTMModel
+from src.models.dict_learner import DLLSTMModel
 import ast
 
 RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
@@ -71,7 +72,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
         if two_branch:
             model = ComposedDLLSTMModel(**kwargs)
         else:
-            model = None # need to implement trend only DLLSTMModel
+            model = DLLSTMModel(**kwargs) # need to implement trend only DLLSTMModel
             pass
         # save necessary dict path for dllstm model
         model.get_glove_and_intent_path(feature_pars)
