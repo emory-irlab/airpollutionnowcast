@@ -143,10 +143,10 @@ def get_feature_pars(pars, index):
 
     # path parameters
     feature_pars['log_dir'] = os.path.join(pars['train_model']['log_dir'],
-                                           feature_pars['model_type'] + '-',
+                                           feature_pars['model_type'],
                                            feature_pars['feature'])
     feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'],
-                                                   feature_pars['model_type'] + '-',
+                                                   feature_pars['model_type'],
                                                    feature_pars['feature'] + '.h5')
     # path for dlstm
     feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
