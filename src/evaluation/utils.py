@@ -19,7 +19,7 @@ from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy
 from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
-from src.models.dict_learner_sensor import DLLSTMModel
+from src.models.dict_learner_sensor import ComposedDLLSTMModel
 import ast
 
 RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
@@ -69,7 +69,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
 
     if model_type == 'dllstm':
         if two_branch:
-            model = DLLSTMModel(**kwargs)
+            model = ComposedDLLSTMModel(**kwargs)
         else:
             model = None # need to implement trend only DLLSTMModel
             pass

@@ -1,16 +1,15 @@
-import os
 import datetime
-from src.models.embedding_utils import get_glove_and_intent
-from src.models.lstm import LSTMModel
-import numpy as np
 import os
+
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, TensorBoard
 from tensorflow.keras.initializers import he_normal
-from tensorflow.keras.layers import Dense, Input, concatenate, Dropout
+from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.models import Model as keras_Model
-from tensorflow.keras.regularizers import l1_l2
+
+from src.models.embedding_utils import get_glove_and_intent
+from src.models.lstm import LSTMModel
 
 
 class DLLSTMModel(LSTMModel):
@@ -40,9 +39,14 @@ class DLLSTMModel(LSTMModel):
 
         return model
 
+    def get_glove_and_intent_path(self, pars):
+        self.intent_dict_path = pars['intent_dict_path']
+        self.filtered_dict_path = pars['filtered_dict_path']
+        self.current_word_path = pars['current_word_path']
+
     def fit(self, x_train, x_valid, y_train, y_valid):
         
-        glove_embedding = get_glove_and_intent(None,None,None)
+        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
         glove_embedding_tr = np.tile(glove_embedding, (x_train.shape[0],1 , 1))
         glove_embedding_vl = np.tile(glove_embedding, (x_valid.shape[0],1 , 1))
         glove_embedding_trvl = np.tile(glove_embedding, (x_valid.shape[0] + x_train.shape[0],1 , 1))
@@ -93,7 +97,7 @@ class DLLSTMModel(LSTMModel):
                        epochs=epochs, class_weight=class_weight, verbose=1)
 
     def predict(self, x_test):
-        glove_embedding = get_glove_and_intent(None,None,None)
+        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
         glove_embedding_ts = np.tile(glove_embedding, (x_test.shape[0],1 , 1))
         pred_score = self.model.predict((glove_embedding_ts, x_test))
         pred_class = [0 if i < 0.5 else 1 for i in pred_score]

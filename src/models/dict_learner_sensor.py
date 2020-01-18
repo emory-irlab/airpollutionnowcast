@@ -1,17 +1,18 @@
 import datetime
-from src.models.embedding_utils import get_glove_and_intent
-from src.models.lstm import LSTMModel
-import numpy as np
 import os
+
+import numpy as np
 import tensorflow as tf
-from tensorflow.keras import backend as K
 from tensorflow.keras.callbacks import EarlyStopping, TensorBoard
 from tensorflow.keras.initializers import he_normal
-from tensorflow.keras.layers import Dense, Input, concatenate, Dropout
+from tensorflow.keras.layers import Dense, Input, concatenate
 from tensorflow.keras.models import Model as keras_Model
-from tensorflow.keras.regularizers import l1_l2
 
-class DLLSTMModel(LSTMModel):
+from src.models.embedding_utils import get_glove_and_intent
+from src.models.lstm import LSTMModel
+
+
+class ComposedDLLSTMModel(LSTMModel):
 
     def build(self):
         new_embed_dim = 100 
