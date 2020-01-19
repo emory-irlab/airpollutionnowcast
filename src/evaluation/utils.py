@@ -138,7 +138,7 @@ def get_feature_pars(pars, index):
     feature_pars['feature'] = features_array[index]
 
     # model parameters
-    feature_pars['seq_length'] = int(pars['train_model']['search_lag'])
+    feature_pars['seq_length'] = int(pars['train_model']['seq_length'])
     feature_pars['search_lag'] = int(pars['train_model']['search_lag'])
     feature_pars['model_type'] = ast.literal_eval(pars['train_model']['model_type'])[index]
 
