@@ -161,6 +161,18 @@ def get_feature_pars(pars, index):
     feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
     feature_pars['patience'] = int(pars['train_model']['patience'])
 
+    # assert lens equal
+    len_feature = len(features_array)
+    len_two_branch = len(ast.literal_eval(pars['train_model']['two_branch']))
+    len_first_branch = len(ast.literal_eval(pars['train_model']['first_branch']))
+    len_second_branch = len(ast.literal_eval(pars['train_model']['second_branch']))
+
+    lists = [len_feature, len_two_branch, len_first_branch, len_second_branch]
+    it = iter(lists)
+    the_len = next(it)
+    if not all(l == the_len for l in it):
+        raise ValueError('Not all input feature list have the same length!')
+
     return feature_pars
 
 
