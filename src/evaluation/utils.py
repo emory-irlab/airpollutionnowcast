@@ -15,7 +15,8 @@ from src.data import read_raw_data
 from src.features.build_features import process_data, get_pol_value_series, lag_search_features, get_feature_array
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score, average_precision_score
+from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score, \
+    average_precision_score, precision_recall_curve
 from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
@@ -24,7 +25,7 @@ from src.models.dict_learner import DLLSTMModel
 import ast
 
 RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
-                  'false negatives', 'AUC', 'AP']
+                  'false negatives', 'AUC', 'Interpolated-AP']
 
 
 # read data and process to features
@@ -195,7 +196,7 @@ def result_stat(y_true, y_prediction, pred_score):
     # auc_value
     fpr, tpr, threshold = roc_curve(y_true, pred_score)
     auc_value = auc(fpr, tpr)
-    ap_value = average_precision_score(y_true, pred_score)
+    ap_value = naive_interpolated_precision(y_true, pred_score)
 
     return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value]
 
@@ -261,4 +262,22 @@ def if_create_filtered_dict(feature_pars, train_trend, valid_trend):
 
     return train_trend, valid_trend
 
+
+"""
+Evaluation metrics
+"""
+
+
+def naive_interpolated_precision(y_true, y_scores):
+    precisions, recalls, _ = precision_recall_curve(y_true, y_scores)
+    interp_precisions = []
+
+    # the final point
+    precisions = precisions[:-1]
+    recalls = recalls[:-1]
+
+    for recall_point in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]:
+        interp_precisions.append(precisions[recalls >= recall_point].max())
+
+    return np.mean(interp_precisions)
 
