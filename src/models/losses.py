@@ -12,7 +12,7 @@ import keras
 
 # Compatible with tensorflow backend
 
-class FocalLoss(keras.losses.Loss):
+class FocalLoss(tf.keras.losses.Loss):
     def __init__(self, gamma=2., alpha=.25,
              reduction = tf.keras.losses.Reduction.AUTO, name='focal_loss'):
         super(FocalLoss, self).__init__(reduction=reduction,
