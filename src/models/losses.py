@@ -14,7 +14,7 @@ import keras
 
 class FocalLoss(tf.keras.losses.Loss):
     def __init__(self, gamma=2., alpha=.25,
-             reduction = tf.keras.losses.Reduction.AUTO, name='focal_loss'):
+             reduction=tf.keras.losses.Reduction.NONE, name='focal_loss'):
         super(FocalLoss, self).__init__(reduction=reduction,
                                         name=name)
         self.gamma = float(gamma)
