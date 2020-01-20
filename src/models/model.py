@@ -19,6 +19,7 @@ from tensorflow.keras.metrics import FalseNegatives, FalsePositives, TruePositiv
 import datetime
 sys.path.append('.')
 from src.models.metrics import f1
+from src.models.losses import focal_loss
 
 
 class Model(object):
@@ -35,7 +36,7 @@ class Model(object):
         with tf.name_scope('Model'):
             self.model = self.build()
             self.model.compile(optimizer=Adam(lr=self.learning_rate),
-                               loss='binary_crossentropy',
+                               loss=[focal_loss(alpha=.25, gamma=2)],
                                metrics=['accuracy', f1, TrueNegatives(),
                                         FalseNegatives(), TruePositives(),
                                         FalsePositives()])

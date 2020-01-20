@@ -25,7 +25,7 @@ from src.models.dict_learner import DLLSTMModel
 import ast
 
 RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
-                  'false negatives', 'AUC', 'Interpolated-AP']
+                  'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
 
 # read data and process to features
@@ -196,9 +196,10 @@ def result_stat(y_true, y_prediction, pred_score):
     # auc_value
     fpr, tpr, threshold = roc_curve(y_true, pred_score)
     auc_value = auc(fpr, tpr)
-    ap_value = naive_interpolated_precision(y_true, pred_score)
+    ap_value = average_precision_score(y_true, pred_score)
+    intpol_ap_value = naive_interpolated_precision(y_true, pred_score)
 
-    return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value]
+    return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value], intpol_ap_value
 
 
 # right result to report file
