@@ -267,3 +267,9 @@ def get_city_output_path(template_file_path, city):
     file_name = '_' + os.path.basename(template_file_path)
     output_path = os.path.join(os.path.dirname(template_file_path), city + file_name)
     return output_path
+
+
+# get inner join common columns
+def inner_concatenate(x_train_all, train_data):
+    x_train_all = pd.concat([x_train_all, train_data], join='inner', ignore_index=True, sort=False)
+    return x_train_all

@@ -1,4 +1,4 @@
-.PHONY: clean lint requirements train_model predict_model
+.PHONY: clean lint requirements train_model predict_model train_test_split
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -20,9 +20,9 @@ endif
 #################################################################################
 
 CONFIG_PATH = config/parameters.ini
-TRAIN_DATA_PATH = data/processed/train.csv
-VALID_DATA_PATH = data/processed/valid.csv
-TEST_DATA_PATH = data/processed/test.csv
+TRAIN_DATA_PATH = data/processed/common/train.csv
+VALID_DATA_PATH = data/processed/common/valid.csv
+TEST_DATA_PATH = data/processed/common/test.csv
 
 #################################################################################
 # PROJECT CONSTRUCT                                                                 #
@@ -76,11 +76,11 @@ data/interim/merged.csv: data/interim/pol.csv data/interim/search.csv data/inter
 	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(CONFIG_PATH) $^ $@
 
 ## train test split into files
-data/processed/train.csv: data/interim/merged.csv
+train_test_split: data/interim/merged.csv
 	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(CONFIG_PATH) $< $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
 
 ## train model
-train_model: data/processed/train.csv
+train_model:
 	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH)
 
 ## predict and get report

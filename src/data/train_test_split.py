@@ -17,7 +17,7 @@ import pandas as pd
 import os
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, select_years, get_city_output_path
+from src.data.utils import read_raw_data, select_years, get_city_output_path, inner_concatenate
 
 
 @click.command()
@@ -29,6 +29,11 @@ from src.data.utils import read_raw_data, select_years, get_city_output_path
 def extract_file(config_path, merged_file_path, train_data_path, valid_data_path, test_data_path):
     logger = logging.getLogger(__name__)
     logger.info('data train-test splitting')
+
+    # save path exist make sure
+    save_pardir = os.path.dirname(train_data_path)
+    if not os.path.exists(save_pardir):
+        os.makedirs(save_pardir)
 
     pars = configparser.ConfigParser()
     pars.read(config_path)
@@ -66,10 +71,15 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         valid_data.to_csv(output_city_valid_path, index=False)
         test_data.to_csv(output_city_test_path, index=False)
 
-        # concatenate data
-        x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
-        x_valid_all = pd.concat([x_valid_all, valid_data], ignore_index=True, sort=False)
-        x_test_all = pd.concat([x_test_all, test_data], ignore_index=True, sort=False)
+        if len(x_train_all) == 0:
+            x_train_all = train_data.copy()
+            x_valid_all = valid_data.copy()
+            x_test_all = test_data.copy()
+        else:
+            # concatenate data
+            x_train_all = inner_concatenate(x_train_all, train_data)
+            x_valid_all = inner_concatenate(x_valid_all, valid_data)
+            x_test_all = inner_concatenate(x_test_all, test_data)
 
     # drop all NAs columns
     x_train_all.dropna(axis=1, how='all', inplace=True)
