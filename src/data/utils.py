@@ -256,3 +256,14 @@ Utils for merge_data_files.py
 def normalize_column(input_df):
     output_df = (input_df - input_df.mean()) / input_df.std()
     return output_df
+
+"""
+Utils for train_test_split.py
+"""
+
+
+# get city output path
+def get_city_output_path(template_file_path, city):
+    file_name = '_' + os.path.basename(template_file_path)
+    output_path = os.path.join(os.path.dirname(template_file_path), city + file_name)
+    return output_path

@@ -17,7 +17,7 @@ import pandas as pd
 import os
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, select_years
+from src.data.utils import read_raw_data, select_years, get_city_output_path
 
 
 @click.command()
@@ -45,14 +45,15 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     label_columns = ast.literal_eval(pars['extract_pol_label']['y_column_name'])
     seed_word_list = label_columns + seed_word_list
 
-    input_single_file_name = '_' + os.path.basename(merged_file_path)
-
     # concatenate the train and valid data
     x_train_all, x_valid_all, x_test_all = pd.DataFrame(columns=seed_word_list),\
                                            pd.DataFrame(columns=seed_word_list), pd.DataFrame(columns=seed_word_list)
 
     for city in city_list:
-        input_single_file_path = os.path.join(os.path.dirname(merged_file_path), city + input_single_file_name)
+        input_single_file_path = get_city_output_path(merged_file_path, city)
+        output_city_test_path = get_city_output_path(test_data_path, city)
+        output_city_train_path = get_city_output_path(train_data_path, city)
+        output_city_valid_path = get_city_output_path(valid_data_path, city)
 
         merged_data = read_raw_data(input_single_file_path)
         merged_data.index = pd.to_datetime(merged_data.DATE)
@@ -60,6 +61,10 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         train_data = select_years(merged_data, train_years)
         valid_data = select_years(merged_data, valid_years)
         test_data = select_years(merged_data, test_years)
+        # save single city data
+        train_data.to_csv(output_city_train_path, index=False)
+        valid_data.to_csv(output_city_valid_path, index=False)
+        test_data.to_csv(output_city_test_path, index=False)
 
         # concatenate data
         x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)

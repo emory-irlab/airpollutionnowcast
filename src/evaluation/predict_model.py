@@ -12,6 +12,7 @@ import pandas as pd
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config, \
     get_model_from_config, get_feature_pars, RECORD_COLUMNS
+from src.data.utils import get_city_output_path
 
 
 @click.command()
@@ -38,6 +39,12 @@ def extract_file(config_path, test_data_path):
 
     # if appending results
     append_mode = pars['predict_model'].getboolean('append_mode')
+    # if city_mode; predict per city
+    city_mode = pars['predict_model'].getboolean('city_mode')
+    city = pars['predict_model']['city']
+
+    if city_mode:
+        test_data_path = get_city_output_path(test_data_path, city)
 
     if os.path.exists(report_path):
         print("Report File Exist! Change Report Path\n")
