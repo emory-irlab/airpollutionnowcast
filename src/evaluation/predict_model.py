@@ -33,12 +33,19 @@ def extract_file(config_path, test_data_path):
     search_lag = int(pars['train_model']['search_lag'])
     features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     # report path
-    record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
     report_path = pars['predict_model']['report_path']
+
+    # if appending results
+    append_mode = pars['predict_model'].getboolean('append_mode')
 
     if os.path.exists(report_path):
         print("Report File Exist! Change Report Path\n")
-        exit(1)
+        if append_mode:
+            record_pd = pd.read_csv(report_path, header=0, index_col=False)
+        else:
+            exit(1)
+    else:
+        record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
 
     # get feature_pars dict
     for index in range(0, len(features_array)):
@@ -75,7 +82,7 @@ def extract_file(config_path, test_data_path):
     report_pardir = os.path.dirname(report_path)
     if not os.path.exists(report_pardir):
         os.makedirs(report_pardir)
-    record_pd.to_csv(report_path, index=False)
+    record_pd.to_csv(report_path, index=False, header=True)
     # save config file
     save_config_path = os.path.join(report_pardir, 'config.ini')
     with open(save_config_path, 'w') as configfile:
