@@ -199,7 +199,7 @@ def result_stat(y_true, y_prediction, pred_score):
     ap_value = average_precision_score(y_true, pred_score)
     intpol_ap_value = naive_interpolated_precision(y_true, pred_score)
 
-    return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value], intpol_ap_value
+    return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value, intpol_ap_value]
 
 
 # right result to report file
