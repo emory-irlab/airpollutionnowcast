@@ -15,7 +15,7 @@ from src.data import read_raw_data
 from src.features.build_features import process_data, get_pol_value_series, lag_search_features, get_feature_array
 import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score
+from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score, average_precision_score
 from src.models.rf import RandomForestModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
@@ -24,7 +24,7 @@ from src.models.dict_learner import DLLSTMModel
 import ast
 
 RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
-                  'false negatives', 'AUC']
+                  'false negatives', 'AUC', 'AP']
 
 
 # read data and process to features
@@ -195,8 +195,9 @@ def result_stat(y_true, y_prediction, pred_score):
     # auc_value
     fpr, tpr, threshold = roc_curve(y_true, pred_score)
     auc_value = auc(fpr, tpr)
+    ap_value = average_precision_score(y_true, pred_score)
 
-    return [accuracy, f1_value, tp, fp, tn, fn, auc_value]
+    return [accuracy, f1_value, tp, fp, tn, fn, auc_value, ap_value]
 
 
 # right result to report file
