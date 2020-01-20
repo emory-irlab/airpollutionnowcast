@@ -43,7 +43,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
         y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
         y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
 
-        ## check if dllstm model, create filtered dict
+        # check if dllstm model, create filtered dict
         train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
 
         x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
@@ -55,9 +55,16 @@ def extract_file(config_path, train_data_path, valid_data_path):
         model.build_model()
         model.fit(x_train, x_valid, y_train, y_valid)
 
-        if not os.path.exists(os.path.dirname(save_model_path)):
-            os.makedirs(os.path.dirname(save_model_path))
+        model_pardir = os.path.dirname(save_model_path)
+
+        if not os.path.exists(model_pardir):
+            os.makedirs(model_pardir)
         model.save(save_model_path)
+
+    # save config file
+    save_config_path = os.path.join(pars['train_model']['save_model_path'], 'config.ini')
+    with open(save_config_path, 'w') as configfile:
+        pars.write(configfile)
 
 
 if __name__ == '__main__':
