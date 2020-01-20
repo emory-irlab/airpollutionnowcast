@@ -26,9 +26,10 @@ def extract_file(config_path, train_data_path, valid_data_path):
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
-    features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # get feature_pars dict
-    for index in range(0, len(features_array)):
+    for index in use_feature:
         feature_pars = get_feature_pars(pars, index)
         # get model_type
         model_type = feature_pars['model_type']

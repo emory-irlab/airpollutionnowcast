@@ -24,7 +24,7 @@ from src.models.dict_learner_sensor import ComposedDLLSTMModel
 from src.models.dict_learner import DLLSTMModel
 import ast
 
-RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
+RECORD_COLUMNS = ['model', 'feature', 'is_two_branch', 'search_lag', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
                   'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
 

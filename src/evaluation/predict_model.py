@@ -31,7 +31,8 @@ def extract_file(config_path, test_data_path):
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
-    features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
+    use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # report path
     report_path = pars['predict_model']['report_path']
 
@@ -42,13 +43,15 @@ def extract_file(config_path, test_data_path):
         print("Report File Exist! Change Report Path\n")
         if append_mode:
             record_pd = pd.read_csv(report_path, header=0, index_col=False)
+            row_count = record_pd.shape[0] + 1
         else:
             exit(1)
     else:
         record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
+        row_count = 0
 
     # get feature_pars dict
-    for index in range(0, len(features_array)):
+    for index in use_feature:
         feature_pars = get_feature_pars(pars, index)
         # get model_type
         model_type = feature_pars['model_type']
@@ -74,9 +77,10 @@ def extract_file(config_path, test_data_path):
         pred_class, pred_score = model.predict(x_test)
         result_scores = result_stat(y_test, pred_class, pred_score)
         print(result_scores)
-        result_scores = [model_type, feature_pars['feature'], feature_pars['is_two_branch']] + \
+        result_scores = [model_type, feature_pars['feature'], feature_pars['is_two_branch'], search_lag] + \
                         result_scores
-        record_pd = write_report(result_scores, record_pd, index)
+        record_pd = write_report(result_scores, record_pd, row_count)
+        row_count += 1
 
     # write results
     report_pardir = os.path.dirname(report_path)
