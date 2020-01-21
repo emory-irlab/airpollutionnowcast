@@ -29,6 +29,10 @@ def extract_file(config_path, test_data_path):
     pars['DEFAULT']['commit_id'] = commit_id
 
     # global parameters
+    # seed word list
+    seed_path = pars['extract_search_trend']['term_list_path']
+    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
+
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
@@ -72,6 +76,8 @@ def extract_file(config_path, test_data_path):
             with open(current_word_path, 'rb') as f:
                 common_terms = pickle.load(f)
             test_trend = test_trend[common_terms]
+        elif city_mode:
+            test_trend = test_trend[seed_word_list]
 
         x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
 
