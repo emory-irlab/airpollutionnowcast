@@ -28,7 +28,6 @@ def extract_file(config_path, test_data_path):
     commit_id = os.popen('git rev-parse HEAD').read().replace('\n', '')
     pars['DEFAULT']['commit_id'] = commit_id
 
-
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
