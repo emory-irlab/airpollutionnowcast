@@ -44,10 +44,6 @@ def extract_file(config_path, test_data_path):
     append_mode = pars['predict_model'].getboolean('append_mode')
     # if city_mode; predict per city
     city_mode = pars['predict_model'].getboolean('city_mode')
-    city = pars['predict_model']['city']
-
-    if city_mode:
-        test_data_path = get_city_output_path(test_data_path, city)
 
     if os.path.exists(report_path):
         print("Report File Exist! Change Report Path\n")
@@ -60,39 +56,50 @@ def extract_file(config_path, test_data_path):
         record_pd = pd.DataFrame(columns=RECORD_COLUMNS)
         row_count = 0
 
-    # get feature_pars dict
-    for index in use_feature:
-        feature_pars = get_feature_pars(pars, index)
-        # get model_type
-        model_type = feature_pars['model_type']
-        # save input_data_path for dllstm model
-        feature_pars['input_data_path'] = test_data_path
-        y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+    test_data_path_list = []
+    if city_mode:
+        city_list = ast.literal_eval(pars['predict_model']['city'])
+        for city in city_list:
+            city_test_data_path = get_city_output_path(test_data_path, city)
+            test_data_path_list.append(city_test_data_path)
+    else:
+        city_list = ['all']
+        test_data_path_list.append(test_data_path)
 
-        # design for dllstm model
-        if model_type == 'dllstm':
-            # get common terms
-            current_word_path = feature_pars['current_word_path']
-            with open(current_word_path, 'rb') as f:
-                common_terms = pickle.load(f)
-            test_trend = test_trend[common_terms]
-        elif city_mode:
-            test_trend = test_trend[seed_word_list]
+    for city, test_data_path in zip(city_list, test_data_path_list):
+        # get feature_pars dict
+        for index in use_feature:
+            feature_pars = get_feature_pars(pars, index)
+            # get model_type
+            model_type = feature_pars['model_type']
+            # save input_data_path for dllstm model
+            feature_pars['input_data_path'] = test_data_path
+            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
 
-        x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
+            # design for dllstm model
+            if model_type == 'dllstm':
+                # get common terms
+                current_word_path = feature_pars['current_word_path']
+                with open(current_word_path, 'rb') as f:
+                    common_terms = pickle.load(f)
+                test_trend = test_trend[common_terms]
+            elif city_mode:
+                test_trend = test_trend[seed_word_list]
 
-        model = get_model_from_config(feature_pars, model_type, embedding_dim)
-        # build model
-        model.build_model()
-        model.load(feature_pars['save_model_path'])
+            x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
 
-        pred_class, pred_score = model.predict(x_test)
-        result_scores = result_stat(y_test, pred_class, pred_score)
-        print(result_scores)
-        result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
-                         search_lag] + result_scores
-        record_pd = write_report(result_scores, record_pd, row_count)
-        row_count += 1
+            model = get_model_from_config(feature_pars, model_type, embedding_dim)
+            # build model
+            model.build_model()
+            model.load(feature_pars['save_model_path'])
+
+            pred_class, pred_score = model.predict(x_test)
+            result_scores = result_stat(y_test, pred_class, pred_score)
+            print(result_scores)
+            result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
+                             search_lag] + result_scores
+            record_pd = write_report(result_scores, record_pd, row_count)
+            row_count += 1
 
     # write results
     report_pardir = os.path.dirname(report_path)
