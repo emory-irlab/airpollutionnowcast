@@ -22,6 +22,10 @@ def extract_file(config_path, train_data_path, valid_data_path):
 
     pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
+    # automatically get commit id from environment
+    commit_id = os.popen('git rev-parse HEAD').read().replace('\n', '')
+    pars['DEFAULT']['commit_id'] = commit_id
+
 
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
