@@ -34,6 +34,7 @@ def process_features(train_data_path, seq_length, search_lag):
     y_data, pol_val, trend_fea, phys_fea = process_data(train_data)
     processed_pol = get_pol_value_series(pol_val, seq_length)
     processed_trend = lag_search_features(trend_fea, search_lag)
+    phys_fea = lag_search_features(phys_fea, -1)
     # fill NAs with 0 for phys_fea
     phys_fea.fillna(0, inplace=True)
     process_phys = np.array(phys_fea)

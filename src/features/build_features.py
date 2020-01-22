@@ -14,8 +14,7 @@ def process_data(input_data):
     pol_val = input_data.iloc[:, 1]
     date_col_index = input_data.columns.get_loc("DATE")
     trend_fea = input_data.iloc[:, 2:date_col_index]
-    # phys_fea = input_data.iloc[:, date_col_index+1:]
-    phys_fea = lag_search_features(input_data.iloc[:, date_col_index+1:], -1)
+    phys_fea = input_data.iloc[:, date_col_index+1:]
     return y, pol_val, trend_fea, phys_fea
 
 
