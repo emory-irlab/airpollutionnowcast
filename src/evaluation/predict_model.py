@@ -74,7 +74,7 @@ def extract_file(config_path, test_data_path):
             model_type = feature_pars['model_type']
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
-            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, search_lag, None)
 
             # design for dllstm model
             if model_type == 'dllstm':

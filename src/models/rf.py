@@ -8,9 +8,12 @@
 import pickle
 
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import PredefinedSplit
+from src.data.utils import year_column
+from sklearn.model_selection import StratifiedKFold
 
 
 class RandomForestModel(object):
@@ -39,17 +42,15 @@ class RandomForestModel(object):
         x_valid = self.arr_concate(x_valid)
         x_train_valid = arr_append(x_train, x_valid)
         y_train_valid = arr_append(y_train, y_valid)
-
-        train_len = len(y_train)
-        valid_len = len(y_valid)
-        valid_index = [i for i in range(train_len, train_len + valid_len)]
-        test_fold = [-1 if i not in valid_index else 0 for i in range(0, train_len + valid_len)]
-        ps = PredefinedSplit(test_fold=test_fold)
+        y_train_valid = pd.DataFrame(data=y_train_valid, columns=['label', year_column])
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        skf_generator = skf.split(y_train_valid, y_train_valid[year_column])
 
         rfc = RandomForestClassifier(random_state=0, class_weight='balanced')
 
-        self.model = GridSearchCV(rfc, self.grid_parameters, cv=ps,
-                                  scoring='f1', verbose=0, n_jobs=2)
+        self.model = GridSearchCV(rfc, self.grid_parameters, cv=skf_generator,
+                                  scoring='average_precision', verbose=0, n_jobs=2)
+        y_train_valid.drop([year_column], axis=1, inplace=True)
 
         self.model.fit(x_train_valid, y_train_valid)
 

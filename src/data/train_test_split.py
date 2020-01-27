@@ -17,7 +17,8 @@ import pandas as pd
 import os
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, select_years, get_city_output_path, inner_concatenate
+from src.data.utils import read_raw_data, select_years, get_city_output_path, inner_concatenate, \
+    date_column, year_column, split_label_column, shuffle_train_test_split
 
 
 @click.command()
@@ -45,7 +46,10 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     # seed word list
     seed_path = pars['extract_search_trend']['term_list_path']
     seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
-    seed_word_list.append('DATE')
+    seed_word_list.append(date_column)
+    seed_word_list.append(year_column)
+    seed_word_list.append(split_label_column)
+
     # pol label list
     label_columns = ast.literal_eval(pars['extract_pol_label']['y_column_name'])
     seed_word_list = label_columns + seed_word_list
@@ -70,6 +74,9 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         train_data.to_csv(output_city_train_path, index=False)
         valid_data.to_csv(output_city_valid_path, index=False)
         test_data.to_csv(output_city_test_path, index=False)
+
+        # split train-test according to cities
+        train_data = shuffle_train_test_split(train_data)
 
         if len(x_train_all) == 0:
             x_train_all = train_data.copy()

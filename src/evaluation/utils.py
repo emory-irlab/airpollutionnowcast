@@ -12,6 +12,7 @@ from typing import List
 
 sys.path.append('.')
 from src.data import read_raw_data
+from src.data.utils import split_label_column, year_column, date_column
 from src.features.build_features import process_data, get_pol_value_series, lag_search_features, get_feature_array
 import numpy as np
 import pandas as pd
@@ -29,15 +30,20 @@ RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'ac
 
 
 # read data and process to features
-def process_features(train_data_path, seq_length, search_lag):
+def process_features(train_data_path, search_lag, pol_back_days, split_label):
     train_data = read_raw_data(train_data_path)
+    train_data = train_data[train_data[split_label_column] == split_label]
+    # remove YEAR column
+    years_group = train_data[year_column]
+    train_data.drop([year_column, split_label_column], axis=1, inplace=True)
     y_data, pol_val, trend_fea, phys_fea = process_data(train_data)
-    processed_pol = get_pol_value_series(pol_val, seq_length)
+    processed_pol = get_pol_value_series(pol_val, pol_back_days)
     processed_trend = lag_search_features(trend_fea, search_lag)
     phys_fea = lag_search_features(phys_fea, -1)
     # fill NAs with 0 for phys_fea
     phys_fea.fillna(0, inplace=True)
     process_phys = np.array(phys_fea)
+    y_data = pd.concat([y_data, years_group], axis=1)
     return y_data, processed_pol, process_phys, processed_trend
 
 
@@ -282,4 +288,12 @@ def naive_interpolated_precision(y_true, y_scores):
         interp_precisions.append(precisions[recalls >= recall_point].max())
 
     return np.mean(interp_precisions)
+
+"""
+ADD Random Train-Test split function 
+"""
+
+
+
+
 

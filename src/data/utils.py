@@ -9,7 +9,14 @@ import pandas as pd
 import datetime as dt
 import ast
 import numpy as np
+from sklearn.model_selection import StratifiedShuffleSplit
 
+## DEFINE Global Variable Name
+date_column = 'DATE'
+year_column = 'YEAR'
+split_label_column = 'SPLIT_LABEL'
+train_label = 'train'
+test_label = 'test'
 
 def read_global_pars(pars):
     city_list = ast.literal_eval(pars['global']['city'])
@@ -85,6 +92,9 @@ def select_years(input_df, years):
     :param years: list(int)
     :return: pd.DataFrame
     """
+    # if no years to select, return empty dataFrame
+    if len(years) == 0:
+        return pd.DataFrame()
     selected_days = []
     for single_year in years:
         single_year_index = select_single_year(input_df, single_year)
@@ -273,3 +283,33 @@ def get_city_output_path(template_file_path, city):
 def inner_concatenate(x_train_all, train_data):
     x_train_all = pd.concat([x_train_all, train_data], join='inner', ignore_index=True, sort=False)
     return x_train_all
+
+
+# get shuffle index
+def get_shuffle_index(year_of_point):
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2, train_size=0.8, random_state=42)
+    train_index, test_index = next(sss.split(year_of_point, np.array(year_of_point)))
+    return train_index, test_index
+
+
+# split according to index
+def get_shuffle_split(input_data, train_index, test_index):
+    array = np.array(input_data)
+    train_data = []
+    test_data = []
+    for i in range(0, len(array)):
+        if i in train_index:
+            train_data.append(array[i])
+        elif i in test_index:
+            test_data.append(array[i])
+    return train_data, test_data
+
+
+# city shuffle train-test split
+def shuffle_train_test_split(input_data):
+    input_df = input_data.copy()
+    year_of_point = input_df[year_column]
+    train_index, test_index = get_shuffle_index(year_of_point)
+    input_df.ix[train_index, split_label_column] = train_label
+    input_df.ix[test_index, split_label_column] = test_label
+    return input_df

@@ -18,7 +18,7 @@ import pandas as pd
 import ast
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, normalize_column
+from src.data.utils import read_raw_data, normalize_column, date_column, year_column, split_label_column
 
 
 @click.command()
@@ -58,13 +58,17 @@ def extract_file(config_path, pol_path, search_path, process_phys_path, output_f
         output_df = pd.merge(pol_data, search_data, left_index=True, right_index=True, how='left',
                                 indicator=False)
 
-        output_df['DATE'] = output_df.index.format()
+        output_df[date_column] = output_df.index.format()
+        output_df[year_column] = output_df[date_column].str.slice(start=0, stop=4).astype('int')
+        output_df[split_label_column] = output_df[year_column]
+
         output_df = pd.merge(output_df, process_phys_data, left_index=True, right_index=True, how='left',
                              indicator=False)
         output_df.to_csv(output_single_file_path, index=False)
 
     # create merged.csv to check existence
     open(output_filepath, 'w').close()
+
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)

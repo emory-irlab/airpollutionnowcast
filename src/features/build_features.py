@@ -6,13 +6,13 @@ import numpy as np
 # import sys
 # sys.path.append('.')
 import random
-
+from src.data.utils import date_column
 
 # code to process data to x and y variables
 def process_data(input_data):
     y = input_data.iloc[:, 0]
     pol_val = input_data.iloc[:, 1]
-    date_col_index = input_data.columns.get_loc("DATE")
+    date_col_index = input_data.columns.get_loc(date_column)
     trend_fea = input_data.iloc[:, 2:date_col_index]
     phys_fea = input_data.iloc[:, date_col_index+1:]
     return y, pol_val, trend_fea, phys_fea

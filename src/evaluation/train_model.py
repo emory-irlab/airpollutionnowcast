@@ -10,6 +10,7 @@ import click
 sys.path.append('.')
 from src.evaluation.utils import process_features, get_model_from_config, get_feature_from_config, \
     get_feature_pars, if_create_filtered_dict
+from src.data.utils import get_shuffle_index, year_column, get_shuffle_split, train_label
 
 
 @click.command()
@@ -30,6 +31,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
+    pol_back_days = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # get feature_pars dict
@@ -42,22 +44,30 @@ def extract_file(config_path, train_data_path, valid_data_path):
             logger.info("Model File Exist! Change Model Path\n")
             continue
         # save input_data_path for dllstm model
-        feature_pars['input_data_path'] = valid_data_path
+        feature_pars['input_data_path'] = train_data_path
 
-        y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
-        y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
+        y_train, train_pol, train_phys, train_trend = process_features(train_data_path, search_lag, pol_back_days, train_label)
+        # y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, search_lag, pol_back_days, train_label)
 
         # check if dllstm model, create filtered dict
         train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
 
         x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
-        x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
+        # x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
 
         model = get_model_from_config(feature_pars, model_type, embedding_dim)
 
+        # shuffle cross-validation
+        tr_index, va_index = get_shuffle_index(y_train[year_column])
+        if model_type not in ['rf', 'lr']:
+            y_train.drop([year_column], axis=1, inplace=True)
+
+        x_tr, x_va = get_shuffle_split(x_train, tr_index, va_index)
+        y_tr, y_va = get_shuffle_split(y_train, tr_index, va_index)
+
         # build model
         model.build_model()
-        model.fit(x_train, x_valid, y_train, y_valid)
+        model.fit(x_tr, x_va, y_tr, y_va)
 
         model_pardir = os.path.dirname(save_model_path)
 
