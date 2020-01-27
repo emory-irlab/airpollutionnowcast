@@ -37,7 +37,7 @@ def extract_file(config_path, test_data_path):
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
     # TODO: fix the error of pol_back_days
-    pol_back_days = int(pars['train_model']['search_lag'])
+    pol_back_days = int(pars['train_model']['pol_back_days'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # report path
