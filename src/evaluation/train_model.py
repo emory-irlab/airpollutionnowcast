@@ -50,7 +50,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
         # y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, search_lag, pol_back_days, train_label)
 
         # check if dllstm model, create filtered dict
-        train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
+        # train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
 
         x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
         # x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
