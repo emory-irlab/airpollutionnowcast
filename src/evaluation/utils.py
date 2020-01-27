@@ -50,8 +50,8 @@ def process_features(train_data_path, search_lag, pol_back_days, split_label):
 # get random forest model
 def get_rf_model(pars):
     # parameters for rf model
-    n_estimators = ast.literal_eval(pars['train_model']['n_estimators'])
-    max_depth = ast.literal_eval(pars['train_model']['max_depth'])
+    n_estimators = pars['n_estimators']
+    max_depth = pars['max_depth']
     model = RandomForestModel(n_estimators, max_depth)
     return model
 
@@ -168,6 +168,10 @@ def get_feature_pars(pars, index):
     feature_pars['learning_rate'] = float(pars['train_model']['learning_rate'])
     feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
     feature_pars['patience'] = int(pars['train_model']['patience'])
+
+    # model parameters for rf
+    feature_pars['n_estimators'] = ast.literal_eval(pars['train_model']['n_estimators'])
+    feature_pars['max_depth'] = ast.literal_eval(pars['train_model']['max_depth'])
 
     # assert lens equal
     len_feature = len(features_array)
