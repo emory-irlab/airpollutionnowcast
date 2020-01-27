@@ -70,13 +70,14 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         train_data = select_years(merged_data, train_years)
         valid_data = select_years(merged_data, valid_years)
         test_data = select_years(merged_data, test_years)
+
+        # split train-test according to cities
+        train_data = shuffle_train_test_split(train_data)
+
         # save single city data
         train_data.to_csv(output_city_train_path, index=False)
         valid_data.to_csv(output_city_valid_path, index=False)
         test_data.to_csv(output_city_test_path, index=False)
-
-        # split train-test according to cities
-        train_data = shuffle_train_test_split(train_data)
 
         if len(x_train_all) == 0:
             x_train_all = train_data.copy()
