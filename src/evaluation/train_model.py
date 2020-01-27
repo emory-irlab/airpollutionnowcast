@@ -27,10 +27,10 @@ def extract_file(config_path, train_data_path, valid_data_path):
     commit_id = os.popen('git rev-parse HEAD').read().replace('\n', '')
     pars['DEFAULT']['commit_id'] = commit_id
 
-
     # global parameters
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
+    # TODO: fix the error of pol_back_days
     pol_back_days = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
@@ -46,7 +46,8 @@ def extract_file(config_path, train_data_path, valid_data_path):
         # save input_data_path for dllstm model
         feature_pars['input_data_path'] = train_data_path
 
-        y_train, train_pol, train_phys, train_trend = process_features(train_data_path, search_lag, pol_back_days, train_label)
+        y_train, train_pol, train_phys, train_trend = process_features(train_data_path, search_lag, pol_back_days,
+                                                                       train_label)
         # y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, search_lag, pol_back_days, train_label)
 
         # check if dllstm model, create filtered dict
@@ -86,5 +87,3 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     extract_file()
-
-

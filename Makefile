@@ -85,7 +85,7 @@ train_model:
 
 ## predict and get report
 predict_model: 
-	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
+	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH)
 
 ## Delete all compiled Python files
 clean:

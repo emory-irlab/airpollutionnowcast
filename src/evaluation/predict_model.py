@@ -12,7 +12,7 @@ import pandas as pd
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config, \
     get_model_from_config, get_feature_pars, RECORD_COLUMNS
-from src.data.utils import get_city_output_path
+from src.data.utils import get_city_output_path, test_label
 
 
 @click.command()
@@ -35,6 +35,8 @@ def extract_file(config_path, test_data_path):
 
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
+    # TODO: fix the error of pol_back_days
+    pol_back_days = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # report path
@@ -74,7 +76,7 @@ def extract_file(config_path, test_data_path):
             model_type = feature_pars['model_type']
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
-            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, search_lag, None)
+            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, search_lag, pol_back_days, test_label)
 
             # design for dllstm model
             if model_type == 'dllstm':
