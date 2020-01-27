@@ -29,6 +29,9 @@ class RandomForestModel(object):
         with open(fname, 'rb') as ifile:
             # self.model = pickle.load(ifile)
             self.model = joblib.load(ifile)
+        # print model detail
+        print(self.model.get_params())
+
 
     def arr_concate(self, input_arr):
         if isinstance(input_arr, tuple):
