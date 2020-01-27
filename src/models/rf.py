@@ -51,7 +51,7 @@ class RandomForestModel(object):
         rfc = RandomForestClassifier(random_state=0, class_weight='balanced')
 
         self.model = GridSearchCV(rfc, self.grid_parameters, cv=skf_generator,
-                                  scoring='average_precision', verbose=0, n_jobs=2)
+                                  scoring='roc_auc_score', verbose=0, n_jobs=2)
         y_train_valid.drop([year_column], axis=1, inplace=True)
         y_train_valid = np.array(y_train_valid).ravel()
 
