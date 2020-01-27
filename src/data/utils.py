@@ -309,7 +309,7 @@ def get_shuffle_split(input_data, train_index, test_index):
             train_data.append(array[i])
         elif i in test_index:
             test_data.append(array[i])
-    return train_data, test_data
+    return np.array(train_data), np.array(test_data)
 
 
 # city shuffle train-test split
