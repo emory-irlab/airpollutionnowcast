@@ -209,7 +209,7 @@ def extract_single_city_data(select_columns, single_file_path, trend_data):
     # remove most NA columns
     drop_constant_name = list(log_df.loc[:, log_df.count() < 18].columns)
     # drop same values all time terms
-    drop_constant_name.extend(list(log_df.loc[:, log_df.std() < 2].columns))
+    # drop_constant_name.extend(list(log_df.loc[:, log_df.std() < 2].columns))
     if len(drop_constant_name) != 0:
         print('========Drop Most NAs========')
         print(drop_constant_name)
