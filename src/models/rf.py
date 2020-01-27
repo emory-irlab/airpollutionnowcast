@@ -14,6 +14,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import PredefinedSplit
 from src.data.utils import year_column
 from sklearn.model_selection import StratifiedKFold
+from sklearn.externals import joblib
 
 
 class RandomForestModel(object):
@@ -26,7 +27,8 @@ class RandomForestModel(object):
 
     def load(self, fname):
         with open(fname, 'rb') as ifile:
-            self.model = pickle.load(ifile)
+            # self.model = pickle.load(ifile)
+            self.model = joblib.load(ifile)
 
     def arr_concate(self, input_arr):
         if isinstance(input_arr, tuple):
@@ -51,6 +53,7 @@ class RandomForestModel(object):
         self.model = GridSearchCV(rfc, self.grid_parameters, cv=skf_generator,
                                   scoring='average_precision', verbose=0, n_jobs=2)
         y_train_valid.drop([year_column], axis=1, inplace=True)
+        y_train_valid = np.array(y_train_valid)
 
         self.model.fit(x_train_valid, y_train_valid)
 
@@ -62,6 +65,7 @@ class RandomForestModel(object):
 
     def save(self, fname):
         with open(fname, 'wb') as ofile:
-            pickle.dump(self.model, ofile, pickle.HIGHEST_PROTOCOL)
+            joblib.dump(self.model.best_estimator_, ofile, compress=1)
+            # pickle.dump(self.model, ofile, pickle.HIGHEST_PROTOCOL)
 
 
