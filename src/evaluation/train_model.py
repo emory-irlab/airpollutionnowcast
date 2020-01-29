@@ -42,6 +42,8 @@ def extract_file(config_path, train_data_path, valid_data_path):
         save_model_path = feature_pars['save_model_path']
         if os.path.exists(save_model_path):
             logger.info("Model File Exist! Change Model Path\n")
+            print("Path:")
+            print(save_model_path)
             continue
         # save input_data_path for dllstm model
         feature_pars['input_data_path'] = train_data_path

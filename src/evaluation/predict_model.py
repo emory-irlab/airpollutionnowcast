@@ -49,7 +49,9 @@ def extract_file(config_path, test_data_path):
     city_mode = pars['predict_model'].getboolean('city_mode')
 
     if os.path.exists(report_path):
-        print("Report File Exist! Change Report Path\n")
+        logger.info("Report File Exist! Change Report Path\n")
+        print("Path:")
+        print(report_path)
         if append_mode:
             record_pd = pd.read_csv(report_path, header=0, index_col=False)
             row_count = record_pd.shape[0] + 1
