@@ -313,10 +313,15 @@ def get_shuffle_split(input_data, train_index, test_index):
 
 
 # city shuffle train-test split
-def shuffle_train_test_split(input_data):
+def shuffle_train_test_split(input_data, add_label):
     input_df = input_data.copy()
     year_of_point = input_df[year_column]
     train_index, test_index = get_shuffle_index(year_of_point)
-    input_df.ix[train_index, split_label_column] = train_label
-    input_df.ix[test_index, split_label_column] = test_label
+    input_df.ix[train_index, split_label_column] = add_label
+    # input_df.ix[test_index, split_label_column] = test_label
+    # make all the data as train-data
+    input_df.ix[test_index, split_label_column] = add_label
     return input_df
+
+# train-test-split
+

@@ -18,7 +18,7 @@ import os
 
 sys.path.append('.')
 from src.data.utils import read_raw_data, select_years, get_city_output_path, inner_concatenate, \
-    date_column, year_column, split_label_column, shuffle_train_test_split
+    date_column, year_column, split_label_column, shuffle_train_test_split, train_label, test_label
 
 
 @click.command()
@@ -72,7 +72,8 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         test_data = select_years(merged_data, test_years)
 
         # split train-test according to cities
-        train_data = shuffle_train_test_split(train_data)
+        train_data = shuffle_train_test_split(train_data, train_label)
+        test_data = shuffle_train_test_split(test_data, test_label)
 
         # save single city data
         train_data.to_csv(output_city_train_path, index=False)
