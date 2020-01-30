@@ -279,3 +279,8 @@ def get_city_output_path(template_file_path, city):
 def inner_concatenate(x_train_all, train_data):
     x_train_all = pd.concat([x_train_all, train_data], join='inner', ignore_index=True, sort=False)
     return x_train_all
+
+# get outter join
+def outer_concatenate(x_train_all, train_data):
+    x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
+    return x_train_all
