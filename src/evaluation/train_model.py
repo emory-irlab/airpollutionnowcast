@@ -28,6 +28,9 @@ def extract_file(config_path, train_data_path, valid_data_path):
 
 
     # global parameters
+    # seed word list
+    seed_path = pars['extract_search_trend']['term_list_path']
+    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
@@ -48,7 +51,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
         y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
 
         # check if dllstm model, create filtered dict
-        train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend)
+        train_trend, valid_trend = if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list)
 
         x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
         x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)

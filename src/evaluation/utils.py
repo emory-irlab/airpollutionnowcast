@@ -257,7 +257,7 @@ def generate_dllstm_filtered_dict(pars):
         pickle.dump(terms, f)
 
 
-def if_create_filtered_dict(feature_pars, train_trend, valid_trend):
+def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list):
     model_type = feature_pars['model_type']
 
     if model_type == 'dllstm':
@@ -271,6 +271,9 @@ def if_create_filtered_dict(feature_pars, train_trend, valid_trend):
             common_terms = pickle.load(f)
         train_trend = train_trend[common_terms]
         valid_trend = valid_trend[common_terms]
+    else:
+        train_trend = train_trend[seed_word_list]
+        valid_trend = valid_trend[seed_word_list]
 
     return train_trend, valid_trend
 
