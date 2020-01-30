@@ -83,7 +83,7 @@ def extract_file(config_path, test_data_path):
                 with open(current_word_path, 'rb') as f:
                     common_terms = pickle.load(f)
                 test_trend = test_trend[common_terms]
-            elif city_mode:
+            else:
                 test_trend = test_trend[seed_word_list]
 
             x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
