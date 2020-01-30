@@ -18,6 +18,7 @@ import pandas as pd
 from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score, \
     average_precision_score, precision_recall_curve
 from src.models.rf import RandomForestModel
+from src.models.lr import LRModel
 from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
 from src.models.dict_learner_sensor import ComposedDLLSTMModel
@@ -44,12 +45,10 @@ def process_features(train_data_path, seq_length, search_lag):
 # get random forest model
 def get_rf_model(pars):
     # parameters for rf model
-    n_estimators = ast.literal_eval(pars['train_model']['n_estimators'])
-    max_depth = ast.literal_eval(pars['train_model']['max_depth'])
+    n_estimators = pars['n_estimators']
+    max_depth = pars['max_depth']
     model = RandomForestModel(n_estimators, max_depth)
     return model
-
-
 
 
 def get_two_branch_feature(seq_length, first_branch, second_branch):
@@ -91,8 +90,13 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
 def get_model_from_config(feature_pars, model_type, embedding_dim):
     if model_type == 'rf':
         model = get_rf_model(feature_pars)
+    elif model_type == 'lr':
+        tuned_parameters = {'Cs': list(np.power(10.0, np.arange(-10, 5))),
+                            'l1_ratios': list(np.power(10.0, np.arange(-10, 0)))}
+        model = LRModel(tuned_parameters)
     elif model_type in ['lstm', 'dllstm']:
         model = get_lstm_model(feature_pars, embedding_dim, model_type)
+
     return model
 
 
@@ -164,6 +168,10 @@ def get_feature_pars(pars, index):
     feature_pars['learning_rate'] = float(pars['train_model']['learning_rate'])
     feature_pars['batch_size'] = int(pars['train_model']['batch_size'])
     feature_pars['patience'] = int(pars['train_model']['patience'])
+
+    # model parameters for rf
+    feature_pars['n_estimators'] = ast.literal_eval(pars['train_model']['n_estimators'])
+    feature_pars['max_depth'] = ast.literal_eval(pars['train_model']['max_depth'])
 
     # assert lens equal
     len_feature = len(features_array)
