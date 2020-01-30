@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from configparser import ExtendedInterpolation
+import pandas as pd
 
 import click
 
@@ -25,7 +26,6 @@ def extract_file(config_path, train_data_path, valid_data_path):
     # automatically get commit id from environment
     commit_id = os.popen('git rev-parse HEAD').read().replace('\n', '')
     pars['DEFAULT']['commit_id'] = commit_id
-
 
     # global parameters
     # seed word list
