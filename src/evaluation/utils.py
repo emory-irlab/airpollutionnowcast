@@ -50,6 +50,8 @@ def get_rf_model(pars):
     return model
 
 
+
+
 def get_two_branch_feature(seq_length, first_branch, second_branch):
     x_train_sensor, embedding_sensor = get_feature_array(first_branch, seq_length)
     x_train_trend, embedding_trend = get_feature_array(second_branch, seq_length)

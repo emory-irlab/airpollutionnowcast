@@ -1,24 +1,20 @@
 '''
     Author: Chen Lin
     Email: chen.lin@emory.edu
-    Date created: 2019/7/22 
+    Date created: 2020/1/30 
     Python Version: 3.6
 '''
 
-import pickle
+from sklearn.linear_model import LogisticRegressionCV
+from sklearn.model_selection import PredefinedSplit
 
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import PredefinedSplit
 from sklearn.externals import joblib
 
 
-
-class RandomForestModel(object):
-    def __init__(self, n_estimators, max_depth):
-        self.grid_parameters = {'n_estimators': n_estimators,
-                                'max_depth': max_depth}
+class LRModel(object):
+    def __init__(self, tuned_parameters):
+        self.grid_parameters = tuned_parameters
 
     def build_model(self):
         pass
@@ -51,10 +47,22 @@ class RandomForestModel(object):
         test_fold = [-1 if i not in valid_index else 0 for i in range(0, train_len + valid_len)]
         ps = PredefinedSplit(test_fold=test_fold)
 
-        rfc = RandomForestClassifier(random_state=0, class_weight='balanced')
-
-        self.model = GridSearchCV(rfc, self.grid_parameters, cv=ps,
-                                  scoring='f1', verbose=0, n_jobs=2)
+        self.model = LogisticRegressionCV(
+            Cs=self.grid_parameters['Cs']
+            # , penalty='l2'
+            , penalty='elasticnet'
+            , scoring='f1'
+            , solver='saga'
+            , cv=ps
+            , random_state=0
+            , max_iter=10000
+            , class_weight="balanced"
+            # ,fit_intercept=True
+            , fit_intercept=False
+            , tol=10
+            , refit=True
+            , l1_ratios=self.grid_parameters['l1_ratios']
+        )
 
         self.model.fit(x_train_valid, y_train_valid)
 
@@ -66,6 +74,5 @@ class RandomForestModel(object):
 
     def save(self, fname):
         with open(fname, 'wb') as ofile:
-            joblib.dump(self.model.best_estimator_, ofile, compress=1)
-
+            joblib.dump(self.model, ofile, compress=1)
 
