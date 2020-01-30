@@ -20,9 +20,9 @@ endif
 #################################################################################
 
 CONFIG_PATH = config/parameters.ini
-TRAIN_DATA_PATH = data/processed/common/train.csv
-VALID_DATA_PATH = data/processed/common/valid.csv
-TEST_DATA_PATH = data/processed/common/test.csv
+TRAIN_DATA_PATH = data/processed/train.csv
+VALID_DATA_PATH = data/processed/valid.csv
+TEST_DATA_PATH = data/processed/test.csv
 
 #################################################################################
 # PROJECT CONSTRUCT                                                                 #
