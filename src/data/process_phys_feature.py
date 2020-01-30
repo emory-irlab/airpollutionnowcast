@@ -47,7 +47,7 @@ def extract_file(config_path, phys_file_path, output_filepath):
         phys_data = read_raw_data(input_single_file_path)
 
         process_phys = add_quadratic_terms(phys_data, TEMP_MAX_COLUMN_NAME, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
-        process_phys = add_heat_index(process_phys, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
+        # process_phys = add_heat_index(process_phys, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
 
         # index is int instead of datetime, this index set to false
         process_phys.to_csv(output_single_file_path, index=False)
