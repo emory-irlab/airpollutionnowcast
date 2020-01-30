@@ -71,15 +71,10 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         valid_data.to_csv(output_city_valid_path, index=False)
         test_data.to_csv(output_city_test_path, index=False)
 
-        if len(x_train_all) == 0:
-            x_train_all = train_data.copy()
-            x_valid_all = valid_data.copy()
-            x_test_all = test_data.copy()
-        else:
-            # concatenate data
-            x_train_all = inner_concatenate(x_train_all, train_data)
-            x_valid_all = inner_concatenate(x_valid_all, valid_data)
-            x_test_all = inner_concatenate(x_test_all, test_data)
+        # concatenate data
+        x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
+        x_valid_all = pd.concat([x_valid_all, valid_data], ignore_index=True, sort=False)
+        x_test_all = pd.concat([x_test_all, test_data], ignore_index=True, sort=False)
 
     # drop all NAs columns
     x_train_all.dropna(axis=1, how='all', inplace=True)
