@@ -87,6 +87,10 @@ train_model:
 predict_model: 
 	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
 
+## predict fine-tuning results
+predict_fine_tuning:
+	$(PYTHON_INTERPRETER) src/evaluation/predict_fine_tuning.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

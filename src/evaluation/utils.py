@@ -25,7 +25,8 @@ from src.models.dict_learner_sensor import ComposedDLLSTMModel
 from src.models.dict_learner import DLLSTMModel
 import ast
 
-RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'accuracy', 'F1 score', 'true positives', 'false positives', 'true negatives',
+RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'accuracy', 'F1 score', 'true positives',
+                  'false positives', 'true negatives',
                   'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
 
@@ -61,11 +62,11 @@ def get_two_branch_feature(seq_length, first_branch, second_branch):
 
 
 def get_lstm_model(feature_pars, embedding_dim, model_type):
-    kwargs = {'seq_length':feature_pars['seq_length'], 'embedding_dim':embedding_dim,
-              'learning_rate':feature_pars['learning_rate'],
-              'batch_size':feature_pars['batch_size'],
-              'patience':feature_pars['patience'],
-              'log_dir':feature_pars['log_dir']}
+    kwargs = {'seq_length': feature_pars['seq_length'], 'embedding_dim': embedding_dim,
+              'learning_rate': feature_pars['learning_rate'],
+              'batch_size': feature_pars['batch_size'],
+              'patience': feature_pars['patience'],
+              'log_dir': feature_pars['log_dir']}
     log_dir = feature_pars['log_dir']
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
@@ -75,7 +76,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
         if two_branch:
             model = ComposedDLLSTMModel(**kwargs)
         else:
-            model = DLLSTMModel(**kwargs) # need to implement trend only DLLSTMModel
+            model = DLLSTMModel(**kwargs)  # need to implement trend only DLLSTMModel
             pass
         # save necessary dict path for dllstm model
         model.get_glove_and_intent_path(feature_pars)
@@ -157,6 +158,11 @@ def get_feature_pars(pars, index):
     feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'],
                                                    feature_pars['model_type'],
                                                    feature_pars['feature'] + '.h5')
+    # path for fine_tuning models
+    feature_pars['save_fine_tuning_path'] = os.path.join(pars['predict_fine_tuning']['save_fine_tuning_path'],
+                                                         feature_pars['model_type'],
+                                                         feature_pars['feature'] + '.h5')
+
     # path for dlstm
     feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
     feature_pars['filtered_dict_path'] = pars['DLLSTM']['filtered_dict_path']
@@ -295,4 +301,3 @@ def naive_interpolated_precision(y_true, y_scores):
         interp_precisions.append(precisions[recalls >= recall_point].max())
 
     return np.mean(interp_precisions)
-
