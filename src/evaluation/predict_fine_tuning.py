@@ -58,7 +58,7 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
         os.makedirs(report_pardir)
 
     if os.path.exists(report_path):
-        print("Report File Exist! Change Report Path\n")
+        logger.info("Report File Exist! Change Report Path\n")
         if append_mode:
             record_pd = pd.read_csv(report_path, header=0, index_col=False)
             row_count = record_pd.shape[0] + 1
@@ -96,13 +96,24 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
         for index in use_feature:
             feature_pars = get_feature_pars(pars, index)
             save_fine_tuning_path = feature_pars['save_fine_tuning_path']
+
+            # variable is_fine_tuning_exist
+            is_fine_tuning_exist = False
+
+            if os.path.exists(save_fine_tuning_path):
+                logger.info("File tuning model Exist! Change Report Path\n")
+                feature_pars['save_model_path'] = save_fine_tuning_path
+                is_fine_tuning_exist = True
+
+
             # get model_type
             model_type = feature_pars['model_type']
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
             y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
-            y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
-            y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
+            if not is_fine_tuning_exist:
+                y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
+                y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
 
             # design for dllstm model
             if model_type == 'dllstm':
@@ -110,30 +121,35 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
                 current_word_path = feature_pars['current_word_path']
                 with open(current_word_path, 'rb') as f:
                     common_terms = pickle.load(f)
-                train_trend = train_trend[common_terms]
-                valid_trend = valid_trend[common_terms]
+                if not is_fine_tuning_exist:
+                    train_trend = train_trend[common_terms]
+                    valid_trend = valid_trend[common_terms]
                 test_trend = test_trend[common_terms]
             else:
-                train_trend = train_trend[seed_word_list]
-                valid_trend = valid_trend[seed_word_list]
+                if not is_fine_tuning_exist:
+                    train_trend = train_trend[seed_word_list]
+                    valid_trend = valid_trend[seed_word_list]
                 test_trend = test_trend[seed_word_list]
 
-            x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
-            x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
-            x_test, _ = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
+            if not is_fine_tuning_exist:
+                x_train, embedding_dim = get_feature_from_config(feature_pars, train_pol, train_phys, train_trend)
+                x_valid, _ = get_feature_from_config(feature_pars, valid_pol, valid_phys, valid_trend)
+
+            x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
 
             model = get_model_from_config(feature_pars, model_type, embedding_dim)
             # build model
             model.build_model()
             model.load(feature_pars['save_model_path'])
-            model.fit(x_train, x_valid, y_train, y_valid)
 
-            # save fine_tuning models
-            model_pardir = os.path.dirname(save_fine_tuning_path)
+            if not is_fine_tuning_exist:
+                model.fit(x_train, x_valid, y_train, y_valid)
 
-            if not os.path.exists(model_pardir):
-                os.makedirs(model_pardir)
-            model.save(save_fine_tuning_path)
+                # save fine_tuning models
+                model_pardir = os.path.dirname(save_fine_tuning_path)
+                if not os.path.exists(model_pardir):
+                    os.makedirs(model_pardir)
+                model.save(save_fine_tuning_path)
 
             pred_class, pred_score = model.predict(x_test)
             result_scores = result_stat(y_test, pred_class, pred_score)
