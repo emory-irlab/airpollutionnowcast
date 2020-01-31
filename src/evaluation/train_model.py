@@ -68,10 +68,10 @@ def extract_file(config_path, train_data_path, valid_data_path):
             os.makedirs(model_pardir)
         model.save(save_model_path)
 
-    # save config file
-    save_config_path = os.path.join(pars['train_model']['save_model_path'], 'config.ini')
-    with open(save_config_path, 'w') as configfile:
-        pars.write(configfile)
+        # save config file
+        save_config_path = os.path.join(model_pardir, 'config.ini')
+        with open(save_config_path, 'w') as configfile:
+            pars.write(configfile)
 
 
 if __name__ == '__main__':
