@@ -84,7 +84,11 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
         city_list = ['all']
         test_data_path_list.append(test_data_path)
 
-    for city, test_data_path in zip(city_list, test_data_path_list):
+    for city_index in range(0, len(city_list)):
+        city = city_list[city_index]
+        test_data_path = test_data_path_list[city_index]
+        train_data_path = train_data_list[city_index]
+        valid_data_path = valid_data_list[city_index]
         # fine_tuning_model_path
         pars['predict_fine_tuning']['save_fine_tuning_path'] = os.path.join(report_pardir, city)
 
