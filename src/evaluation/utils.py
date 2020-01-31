@@ -87,7 +87,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
             model = ComposedLSTM(**kwargs)
         else:
             model = LSTMModel(**kwargs)
-    elif model_type == 'mtllstm':
+    elif model_type == 'mtlmodel':
         if two_branch:
             model = MTLModel(**kwargs)
         else:
