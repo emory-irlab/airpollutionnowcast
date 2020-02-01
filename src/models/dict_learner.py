@@ -32,9 +32,7 @@ class DLLSTMModel(LSTMModel):
         new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, new_embedding_dim])
 
         net = self.shared_module(new_search_seq, return_seq)
-
         out = Dense(1, activation='sigmoid', kernel_initializer=he_normal(seed=1))(net)
-
         model = keras_Model(inputs=[glove_embedding_input, search_input], outputs=out)
 
         return model

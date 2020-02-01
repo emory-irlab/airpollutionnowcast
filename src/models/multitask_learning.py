@@ -141,14 +141,11 @@ class MTLModel(LSTMModel):
         epochs = max(len(history.epoch) - self.patience, min_epochs)
         # restore initial weights
         self.model.load_weights(tmp_model_path)
-        # remove model file
-        os.remove(tmp_model_path)
 
         self.model.fit(x_train_valid_list[0] + x_train_valid_list[1], y_train_valid_list,
                        batch_size=self.batch_size,
                        epochs=epochs, class_weight=class_weight,
                        verbose=1)
-
         # remove model file
         os.remove(tmp_model_path)
 
