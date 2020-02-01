@@ -8,7 +8,7 @@ from configparser import ExtendedInterpolation
 
 import click
 import pandas as pd
-
+import numpy as np
 sys.path.append('.')
 from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config, \
     get_model_from_config, get_feature_pars, RECORD_COLUMNS
@@ -94,7 +94,7 @@ def extract_file(config_path, test_data_path):
             model.load(feature_pars['save_model_path'])
 
             pred_class, pred_score = model.predict(x_test)
-            result_scores = result_stat(y_test, pred_class, pred_score)
+            result_scores = result_stat(y_test, np.array(pred_class).reshape(-1,), np.array(pred_score).reshape(-1,))
             print(result_scores)
             result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
                              search_lag] + result_scores
