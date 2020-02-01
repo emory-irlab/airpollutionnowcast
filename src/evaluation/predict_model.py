@@ -94,7 +94,8 @@ def extract_file(config_path, test_data_path):
             model.load(feature_pars['save_model_path'])
 
             pred_class, pred_score = model.predict(x_test)
-            result_scores = result_stat(y_test, np.array(pred_class).reshape(-1,), np.array(pred_score).reshape(-1,))
+            pred_class, pred_score = np.array(pred_class).reshape(-1,), np.array(pred_score).reshape(-1,)
+            result_scores = result_stat(y_test[:len(pred_class)], pred_class, pred_score)
             print(result_scores)
             result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
                              search_lag] + result_scores
