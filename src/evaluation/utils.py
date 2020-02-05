@@ -23,7 +23,8 @@ from src.models.composed_lstm import ComposedLSTM
 from src.models.lstm import LSTMModel
 from src.models.dict_learner_sensor import ComposedDLLSTMModel
 from src.models.dict_learner import DLLSTMModel
-from src.models.multitask_learning import MTLModel
+from src.models.multitask_learning import ComposedMTLSTM
+from src.models.multitask_lstm import MTLSTM
 import ast
 import logging
 
@@ -87,13 +88,14 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
             model = ComposedLSTM(**kwargs)
         else:
             model = LSTMModel(**kwargs)
-    elif model_type == 'mtlmodel':
+    elif model_type == 'mtlstm':
         if two_branch:
-            model = MTLModel(**kwargs)
+            model = ComposedMTLSTM(**kwargs)
         else:
-            logger = logging.getLogger(__name__)
-            logger.info('Not two branch model for MTLearning')
-            exit(1)
+            model = MTLSTM(**kwargs)
+            # logger = logging.getLogger(__name__)
+            # logger.info('Not two branch model for MTLearning')
+            # exit(1)
     return model
 
 
