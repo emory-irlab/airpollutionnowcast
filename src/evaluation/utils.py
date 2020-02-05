@@ -106,7 +106,7 @@ def get_model_from_config(feature_pars, model_type, embedding_dim):
         tuned_parameters = {'Cs': list(np.power(10.0, np.arange(-10, 5))),
                             'l1_ratios': list(np.power(10.0, np.arange(-10, 0)))}
         model = LRModel(tuned_parameters)
-    elif model_type in ['lstm', 'dllstm', 'mtlmodel']:
+    elif model_type in ['lstm', 'dllstm', 'mtlstm']:
         model = get_lstm_model(feature_pars, embedding_dim, model_type)
 
     return model
