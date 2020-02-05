@@ -83,7 +83,7 @@ class MTLSTM(LSTMModel):
         def arr_concate(train_arr, valid_arr):
             return np.concatenate([train_arr, valid_arr], axis=0)
 
-        x_train_valid_list = ([], [])
+        x_train_valid_list = []
         y_train_valid_list = []
         for i in range(len(x_train_list)):
             x_train_valid_list.append(arr_concate(x_train_list[i], x_valid_list[i]))
