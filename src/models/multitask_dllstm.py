@@ -63,15 +63,12 @@ class MTDLLSTM(DLLSTMModel):
     def build(self):
 
         # neuron_num = 128
-
-
         word_embedding_dim = 50 + 100
         n_words = 51
 
-        # Model inputs.
-        glove_embedding_input = Input(shape=(n_words, word_embedding_dim))
+        # Model inputs:
 
-        sensor_input_list = [[glove_embedding_input, Input(shape=(self.seq_length, self.embedding_dim))] for _ in range(n_tasks)]
+        sensor_input_list = [[Input(shape=(n_words, word_embedding_dim)), Input(shape=(self.seq_length, self.embedding_dim))] for _ in range(n_tasks)]
 
         sensor_output_list = self.build_sensor_branch(sensor_input_list)
 
