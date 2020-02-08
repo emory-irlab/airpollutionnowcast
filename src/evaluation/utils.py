@@ -114,7 +114,7 @@ def get_model_from_config(feature_pars, model_type, embedding_dim):
         tuned_parameters = {'Cs': list(np.power(10.0, np.arange(-10, 5))),
                             'l1_ratios': list(np.power(10.0, np.arange(-10, 0)))}
         model = LRModel(tuned_parameters)
-    elif model_type in ['lstm', 'dllstm', 'mtlstm']:
+    elif model_type in ['lstm', 'dllstm', 'mtlstm', 'mtdllstm']:
         model = get_lstm_model(feature_pars, embedding_dim, model_type)
     return model
 
@@ -284,7 +284,7 @@ def generate_dllstm_filtered_dict(pars):
 def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list):
     model_type = feature_pars['model_type']
 
-    if model_type == 'dllstm':
+    if model_type in ['dllstm', 'mtdllstm']:
         # check for filtered_dict_path
         filtered_dict_path = feature_pars['filtered_dict_path']
         # get common terms

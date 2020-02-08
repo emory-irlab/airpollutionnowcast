@@ -7,7 +7,7 @@
 
 import sys
 sys.path.append('src')
-from models.dict_leaner import DLLSTMModel
+from models.dict_learner import DLLSTMModel
 
 import datetime
 
