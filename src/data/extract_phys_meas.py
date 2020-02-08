@@ -18,6 +18,7 @@ import os
 
 sys.path.append('.')
 from src.data.utils import read_global_pars, extract_from_raw_data
+from configparser import ExtendedInterpolation
 
 
 @click.command()
@@ -27,7 +28,7 @@ def extract_file(config_path, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('making interim physical measurements data from raw data')
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     city_list, years, season, abs_data_path = read_global_pars(pars)
