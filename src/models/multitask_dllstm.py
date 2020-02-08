@@ -116,8 +116,11 @@ class MTDLLSTM(DLLSTMModel):
 
         #
         x_train_list = [[glove_embedding_tr, x_train] for x_train in x_train_list]
+
         x_valid_list = [[glove_embedding_vl, x_valid] for x_valid in x_valid_list]
         x_train_valid_list = [[glove_embedding_trvl, x_train_valid] for x_train_valid in x_train_valid_list]
+
+        print(np.array(x_train_list).shape)
 
         # patient early stopping
         es = EarlyStopping(monitor='val_loss', mode='min', verbose=1,
