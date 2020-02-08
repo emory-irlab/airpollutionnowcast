@@ -116,7 +116,7 @@ class MTDLLSTM(DLLSTMModel):
 
         # first shape
         print(np.array(x_train_list).shape)
-        print(x_train_list)
+        # print(x_train_list)
 
         x_train_list = [[glove_embedding_tr, x_train] for x_train in x_train_list]
 
