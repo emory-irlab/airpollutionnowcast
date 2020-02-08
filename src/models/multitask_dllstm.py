@@ -20,7 +20,7 @@ from tensorflow.keras.layers import Dense, Input, concatenate, Dropout, LSTM
 from tensorflow.keras.models import Model
 from src.models.embedding_utils import get_glove_and_intent
 
-n_tasks = 1
+n_tasks = 10
 
 
 class MTDLLSTM(DLLSTMModel):
@@ -142,9 +142,9 @@ class MTDLLSTM(DLLSTMModel):
             (_, data_count) = np.unique(y, return_counts=True)
             class_weights.append({0: sum(data_count) / data_count[0], 1: sum(data_count) / data_count[1]})
 
-        # class_weight = {k: class_weights[i] for i, k in enumerate(
-        #     ['dense_1', 'dense_2', 'dense_3', 'dense_4', 'dense_5', 'dense_6', 'dense_7', 'dense_8', 'dense_9',
-        #      'dense_10'])}
+        class_weight = {k: class_weights[i] for i, k in enumerate(
+            ['dense_1', 'dense_2', 'dense_3', 'dense_4', 'dense_5', 'dense_6', 'dense_7', 'dense_8', 'dense_9',
+             'dense_10'])}
         # print(class_weight)
         max_epochs = 1000
         min_epochs = 15
@@ -152,7 +152,7 @@ class MTDLLSTM(DLLSTMModel):
         history = self.model.fit(x_train_list, y_train_list, batch_size=self.batch_size,
                                  epochs=max_epochs,
                                  validation_data=(x_valid_list, y_valid_list),
-                                 # class_weight=class_weight,
+                                 class_weight=class_weight,
                                  verbose=1,
                                  callbacks=[tb, es], shuffle=True)
 
