@@ -114,7 +114,9 @@ class MTDLLSTM(DLLSTMModel):
 
         print(glove_embedding.shape, glove_embedding_tr.shape, glove_embedding_vl.shape, glove_embedding_trvl.shape)
 
-        #
+        # first shape
+        print(np.array(x_train_list).shape)
+
         x_train_list = [[glove_embedding_tr, x_train] for x_train in x_train_list]
 
         x_valid_list = [[glove_embedding_vl, x_valid] for x_valid in x_valid_list]
