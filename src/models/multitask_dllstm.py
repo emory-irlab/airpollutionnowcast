@@ -20,7 +20,7 @@ from tensorflow.keras.layers import Dense, Input, concatenate, Dropout, LSTM
 from tensorflow.keras.models import Model
 from src.models.embedding_utils import get_glove_and_intent
 
-n_tasks = 10
+n_tasks = 1
 
 
 class MTDLLSTM(DLLSTMModel):
