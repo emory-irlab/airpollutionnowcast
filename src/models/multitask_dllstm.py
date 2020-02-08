@@ -88,13 +88,13 @@ class MTDLLSTM(DLLSTMModel):
 
         def make_tl(x):
             l = x.shape[0]
-            return [x[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * 10, int(l / n_tasks))]
+            return [x[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * n_tasks, int(l / n_tasks))]
 
         x_train_list = make_tl(x_train)
         x_valid_list = make_tl(x_valid)
-        y_train_list = [y_train[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * 10, int(l / n_tasks))]
+        y_train_list = [y_train[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * n_tasks, int(l / n_tasks))]
         y_valid_list = [y_valid[int(i):int(i + l2 / n_tasks)] for i in
-                        range(0, int(l2 / n_tasks) * 10, int(l2 / n_tasks))]
+                        range(0, int(l2 / n_tasks) * n_tasks, int(l2 / n_tasks))]
 
         glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
         glove_embedding_tr = np.tile(glove_embedding, (int(l / n_tasks), 1, 1))
@@ -170,7 +170,7 @@ class MTDLLSTM(DLLSTMModel):
     def predict(self, x_test):
         def make_tl(x):
             l = x.shape[0]
-            return [x[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * 10, int(l / n_tasks))]
+            return [x[int(i):int(i + l / n_tasks)] for i in range(0, int(l / n_tasks) * n_tasks, int(l / n_tasks))]
 
         x_test_list = make_tl(x_test)
         pred_score_list = self.model.predict(x_test_list)
