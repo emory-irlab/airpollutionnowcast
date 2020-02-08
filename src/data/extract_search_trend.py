@@ -4,7 +4,7 @@ import configparser
 import logging
 import sys
 from pathlib import Path
-
+from configparser import ExtendedInterpolation
 import click
 import pandas as pd
 import os
@@ -23,7 +23,7 @@ def extract_search_trend(config_path, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('making interim search data set from raw data')
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     city_list, years, season, abs_data_path = read_global_pars(pars)
