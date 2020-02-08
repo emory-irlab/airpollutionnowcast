@@ -17,7 +17,7 @@ class DLLSTMModel(LSTMModel):
     def build(self):
         new_embedding_dim = 100 
         word_embedding_dim = 50 + 100
-        n_words = 51
+        n_words = 152
         return_seq = False
 
         # Model inputs.
