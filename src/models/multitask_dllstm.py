@@ -33,8 +33,10 @@ class MTDLLSTM(DLLSTMModel):
 
         # lstm = LSTM(neuron_num, dropout=0.5, recurrent_dropout=0.5, kernel_initializer=he_normal(seed=1))
         outs = []
-        for i, input_i in enumerate(sensor_input_list):
-            glove_embedding_input, search_input = input_i
+
+        for i, input_i in enumerate(sensor_input_list[:10]):
+            glove_embedding_input = sensor_input_list[i]
+            search_input = sensor_input_list[n_tasks+i]
             # Transform search interest data to incorporate term embeddings.
             new_embedding = Dense(new_embedding_dim, kernel_initializer=he_normal(seed=11), activation='relu')(
                 glove_embedding_input[0])
@@ -68,7 +70,7 @@ class MTDLLSTM(DLLSTMModel):
 
         # Model inputs:
 
-        sensor_input_list = [[Input(shape=(n_words, word_embedding_dim)), Input(shape=(self.seq_length, self.embedding_dim))] for _ in range(n_tasks)]
+        sensor_input_list = [Input(shape=(n_words, word_embedding_dim)) for _ in range(n_tasks)] + [Input(shape=(self.seq_length, self.embedding_dim)) for _ in range(n_tasks)]
 
         sensor_output_list = self.build_sensor_branch(sensor_input_list)
 
@@ -118,10 +120,9 @@ class MTDLLSTM(DLLSTMModel):
         print(np.array(x_train_list).shape)
         # print(x_train_list)
 
-        x_train_list = [[glove_embedding_tr, x_train] for x_train in x_train_list]
-
-        x_valid_list = [[glove_embedding_vl, x_valid] for x_valid in x_valid_list]
-        x_train_valid_list = [[glove_embedding_trvl, x_train_valid] for x_train_valid in x_train_valid_list]
+        x_train_list = [glove_embedding_tr for _ in range(n_tasks)] + x_train_list
+        x_valid_list = [glove_embedding_vl for _ in range(n_tasks)] + x_valid_list
+        x_train_valid_list = [glove_embedding_trvl for _ in range(n_tasks)] + x_train_valid_list
 
         # print(np.array(x_train_list).shape)
 
