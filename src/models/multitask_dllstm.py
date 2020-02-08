@@ -27,24 +27,18 @@ class MTDLLSTM(DLLSTMModel):
 
     def build_sensor_branch(self, sensor_input_list):
 
-        # neuron_num = 128
-
-        new_embedding_dim = 100
-        word_embedding_dim = 50 + 100
-        n_words = 51
-        return_seq = False
-
-        # Model inputs.
-        glove_embedding_input = Input(shape=(n_words, word_embedding_dim))
         # search_input = Input(shape=(self.seq_length, self.embedding_dim))
+        new_embedding_dim = 100
+        return_seq = False
 
         # lstm = LSTM(neuron_num, dropout=0.5, recurrent_dropout=0.5, kernel_initializer=he_normal(seed=1))
         outs = []
         for i, input_i in enumerate(sensor_input_list):
+            glove_embedding_input, search_input = input_i
             # Transform search interest data to incorporate term embeddings.
             new_embedding = Dense(new_embedding_dim, kernel_initializer=he_normal(seed=11), activation='relu')(
                 glove_embedding_input[0])
-            batch_seq = tf.reshape(input_i, [-1, self.embedding_dim])
+            batch_seq = tf.reshape(search_input, [-1, self.embedding_dim])
 
             batch_new_seq = tf.matmul(batch_seq, new_embedding)
 
@@ -68,7 +62,16 @@ class MTDLLSTM(DLLSTMModel):
 
     def build(self):
 
-        sensor_input_list = [Input(shape=(self.seq_length, self.embedding_dim)) for _ in range(n_tasks)]
+        # neuron_num = 128
+
+
+        word_embedding_dim = 50 + 100
+        n_words = 51
+
+        # Model inputs.
+        glove_embedding_input = Input(shape=(n_words, word_embedding_dim))
+
+        sensor_input_list = [[glove_embedding_input, Input(shape=(self.seq_length, self.embedding_dim))] for _ in range(n_tasks)]
 
         sensor_output_list = self.build_sensor_branch(sensor_input_list)
 
