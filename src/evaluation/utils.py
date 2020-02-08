@@ -25,6 +25,7 @@ from src.models.dict_learner_sensor import ComposedDLLSTMModel
 from src.models.dict_learner import DLLSTMModel
 from src.models.multitask_learning import ComposedMTLSTM
 from src.models.multitask_lstm import MTLSTM
+from src.models.multitask_dllstm import MTDLLSTM
 import ast
 import logging
 
@@ -96,6 +97,13 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
             # logger = logging.getLogger(__name__)
             # logger.info('Not two branch model for MTLearning')
             # exit(1)
+    elif model_type == 'mtdllstm':
+        if two_branch:
+            logger = logging.getLogger(__name__)
+            logger.info('Not two branch model for MTLearning')
+            exit(1)
+        else:
+            model = MTDLLSTM(**kwargs)
     return model
 
 
@@ -108,7 +116,6 @@ def get_model_from_config(feature_pars, model_type, embedding_dim):
         model = LRModel(tuned_parameters)
     elif model_type in ['lstm', 'dllstm', 'mtlstm']:
         model = get_lstm_model(feature_pars, embedding_dim, model_type)
-
     return model
 
 
