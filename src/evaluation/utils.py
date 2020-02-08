@@ -104,6 +104,8 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
             exit(1)
         else:
             model = MTDLLSTM(**kwargs)
+        # save necessary dict path for dllstm model
+        model.get_glove_and_intent_path(feature_pars)
     return model
 
 
