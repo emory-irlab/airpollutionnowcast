@@ -15,6 +15,7 @@ import click
 import ast
 import pandas as pd
 import os
+from configparser import ExtendedInterpolation
 
 sys.path.append('.')
 from src.data.utils import read_raw_data, select_years, get_city_output_path, outer_concatenate
@@ -35,7 +36,7 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     if not os.path.exists(save_pardir):
         os.makedirs(save_pardir)
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     city_list = ast.literal_eval(pars['global']['city'])
