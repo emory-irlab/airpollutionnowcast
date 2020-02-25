@@ -92,6 +92,14 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
         # fine_tuning_model_path
         pars['predict_fine_tuning']['save_fine_tuning_path'] = os.path.join(report_pardir, city)
 
+        # record city predict index to pd.DataFrame
+        city_pred_result = pd.DataFrame()
+        city_res_name = city + '-' + pars['extract_pol_label']['pol_type'] + '.csv'
+        # city_res_save_path
+        city_res_save_path = os.path.join(pars['predict_fine_tuning']['save_fine_tuning_path'],
+                                          city_res_name)
+        city_res_record_conc = False
+
         # get feature_pars dict
         for index in use_feature:
             feature_pars = get_feature_pars(pars, index)
@@ -105,12 +113,17 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
                 feature_pars['save_model_path'] = save_fine_tuning_path
                 is_fine_tuning_exist = True
 
-
             # get model_type
             model_type = feature_pars['model_type']
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
             y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+
+            # record city result
+            if not city_res_record_conc:
+                city_pred_result['pol_conc'] = test_pol
+                city_pred_result['pol_label'] = y_test
+
             if not is_fine_tuning_exist:
                 y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
                 y_valid, valid_pol, valid_phys, valid_trend = process_features(valid_data_path, seq_length, search_lag)
@@ -152,12 +165,17 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
                 model.save(save_fine_tuning_path)
 
             pred_class, pred_score = model.predict(x_test)
+            # record city_res
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-index'] = test_pol
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-label'] = y_test
+
             result_scores = result_stat(y_test, pred_class, pred_score)
             print(result_scores)
             result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
                              search_lag, 'yes'] + result_scores
             record_pd = write_report(result_scores, record_pd, row_count)
             row_count += 1
+        city_pred_result.to_csv(city_res_save_path, index=False, columns=True)
 
     # write results
     record_pd.to_csv(report_path, index=False, header=True)
