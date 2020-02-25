@@ -98,7 +98,7 @@ def extract_file(config_path, test_data_path):
             result_scores = result_stat(y_test[:len(pred_class)], pred_class, pred_score)
             print(result_scores)
             result_scores = [city, model_type, feature_pars['feature'], feature_pars['is_two_branch'],
-                             search_lag] + result_scores
+                             search_lag, 'no'] + result_scores
             record_pd = write_report(result_scores, record_pd, row_count)
             row_count += 1
 

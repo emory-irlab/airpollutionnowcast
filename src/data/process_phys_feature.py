@@ -18,7 +18,7 @@ import os
 
 sys.path.append('.')
 from src.data.utils import read_raw_data, add_quadratic_terms, add_heat_index
-
+from configparser import ExtendedInterpolation
 
 @click.command()
 @click.argument('config_path', type=click.Path(exists=True))
@@ -28,7 +28,7 @@ def extract_file(config_path, phys_file_path, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('making interim physical measurements data from raw data')
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     city_list = ast.literal_eval(pars['global']['city'])
