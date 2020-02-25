@@ -122,7 +122,7 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
 
             # record city result
             if not city_res_record_conc:
-                city_pred_result['pol_conc'] = np.array(test_pol).reshape(-1)
+                # city_pred_result['pol_conc'] = np.array(test_pol).reshape(-1)
                 city_pred_result['pol_label'] = np.array(y_test).reshape(-1)
                 city_res_record_conc = True
 
