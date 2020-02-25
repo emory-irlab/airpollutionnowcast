@@ -11,6 +11,7 @@ import os
 import pickle
 import sys
 from configparser import ExtendedInterpolation
+import numpy as np
 
 import click
 import pandas as pd
@@ -121,8 +122,9 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
 
             # record city result
             if not city_res_record_conc:
-                city_pred_result['pol_conc'] = test_pol
-                city_pred_result['pol_label'] = y_test
+                city_pred_result['pol_conc'] = np.array(test_pol).reshape(-1)
+                city_pred_result['pol_label'] = np.array(y_test).reshape(-1)
+                city_res_record_conc = True
 
             if not is_fine_tuning_exist:
                 y_train, train_pol, train_phys, train_trend = process_features(train_data_path, seq_length, search_lag)
@@ -166,8 +168,8 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
 
             pred_class, pred_score = model.predict(x_test)
             # record city_res
-            city_pred_result[model_type+'-'+feature_pars['feature'] + '-index'] = test_pol
-            city_pred_result[model_type+'-'+feature_pars['feature'] + '-label'] = y_test
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-index'] = np.array(pred_score).reshape(-1)
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-label'] = np.array(pred_class).reshape(-1)
 
             result_scores = result_stat(y_test, pred_class, pred_score)
             print(result_scores)
