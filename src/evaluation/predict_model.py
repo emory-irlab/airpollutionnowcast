@@ -39,6 +39,8 @@ def extract_file(config_path, test_data_path):
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
     # report path
     report_path = pars['predict_model']['report_path']
+    # write results
+    report_pardir = os.path.dirname(report_path)
 
     # if appending results
     append_mode = pars['predict_model'].getboolean('append_mode')
@@ -67,6 +69,17 @@ def extract_file(config_path, test_data_path):
         test_data_path_list.append(test_data_path)
 
     for city, test_data_path in zip(city_list, test_data_path_list):
+        # fine_tuning_model_path
+        city_resdir = os.path.join(report_pardir, city)
+        if not os.path.exists(city_resdir):
+            os.makedirs(city_resdir)
+        # record city predict index to pd.DataFrame
+        city_pred_result = pd.DataFrame()
+        city_res_name = city + '-' + pars['extract_pol_label']['pol_type'] + '-no_finetuing' + '.csv'
+        # city_res_save_path
+        city_res_save_path = os.path.join(city_resdir, city_res_name)
+        city_res_record_conc = False
+
         # get feature_pars dict
         for index in use_feature:
             feature_pars = get_feature_pars(pars, index)
@@ -75,6 +88,11 @@ def extract_file(config_path, test_data_path):
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
             y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+
+            # record city result
+            if not city_res_record_conc:
+                city_pred_result['pol_label'] = np.array(y_test).reshape(-1)
+                city_res_record_conc = True
 
             # design for dllstm model
             if model_type == 'dllstm':
@@ -94,6 +112,10 @@ def extract_file(config_path, test_data_path):
             model.load(feature_pars['save_model_path'])
 
             pred_class, pred_score = model.predict(x_test)
+            # record city_res
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-index'] = np.array(pred_score).reshape(-1)
+            city_pred_result[model_type+'-'+feature_pars['feature'] + '-label'] = np.array(pred_class).reshape(-1)
+
             pred_class, pred_score = np.array(pred_class).reshape(-1,), np.array(pred_score).reshape(-1,)
             result_scores = result_stat(y_test[:len(pred_class)], pred_class, pred_score)
             print(result_scores)
@@ -101,9 +123,8 @@ def extract_file(config_path, test_data_path):
                              search_lag, 'no'] + result_scores
             record_pd = write_report(result_scores, record_pd, row_count)
             row_count += 1
+        city_pred_result.to_csv(city_res_save_path, index=False, header=True)
 
-    # write results
-    report_pardir = os.path.dirname(report_path)
     if not os.path.exists(report_pardir):
         os.makedirs(report_pardir)
     record_pd.to_csv(report_path, index=False, header=True)
