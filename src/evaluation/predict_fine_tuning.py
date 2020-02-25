@@ -177,7 +177,7 @@ def extract_file(config_path, train_data_path, valid_data_path, test_data_path):
                              search_lag, 'yes'] + result_scores
             record_pd = write_report(result_scores, record_pd, row_count)
             row_count += 1
-        city_pred_result.to_csv(city_res_save_path, index=False, columns=True)
+        city_pred_result.to_csv(city_res_save_path, index=False, header=True)
 
     # write results
     record_pd.to_csv(report_path, index=False, header=True)
