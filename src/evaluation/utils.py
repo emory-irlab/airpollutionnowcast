@@ -29,7 +29,7 @@ from src.models.multitask_dllstm import MTDLLSTM
 import ast
 import logging
 
-RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'accuracy', 'F1 score', 'true positives',
+RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'city_fine_tuning', 'accuracy', 'F1 score', 'true positives',
                   'false positives', 'true negatives',
                   'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
