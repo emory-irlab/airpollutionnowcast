@@ -84,9 +84,10 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         x_test_all = outer_concatenate(x_test_all, test_data)
 
     # drop all NAs columns
-    x_train_all.dropna(axis=1, how='all', inplace=True)
-    x_valid_all.dropna(axis=1, how='all', inplace=True)
-    x_test_all.dropna(axis=1, how='all', inplace=True)
+    # this is not correct since some of them might two cities => cause NAs
+#     x_train_all.dropna(axis=1, how='all', inplace=True)
+#     x_valid_all.dropna(axis=1, how='all', inplace=True)
+#     x_test_all.dropna(axis=1, how='all', inplace=True)
 
     # create train.csv, test.csv to check existence
     x_train_all.to_csv(train_data_path, index=False)

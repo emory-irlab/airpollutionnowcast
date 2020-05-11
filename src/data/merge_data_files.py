@@ -36,6 +36,9 @@ def extract_file(config_path, pol_path, search_path, process_phys_path, output_f
 
     city_list = ast.literal_eval(pars['global']['city'])
 
+    # re-direct search path 
+    search_path = pars['merge_data_files'][pars['merge_data_files']['search_data_source']]
+    
     input_pol_name = '_' + os.path.basename(pol_path)
     input_search_name = '_' + os.path.basename(search_path)
     input_phys_name = '_' + os.path.basename(process_phys_path)

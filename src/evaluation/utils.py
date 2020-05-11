@@ -294,7 +294,11 @@ def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_li
         if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
             generate_dllstm_filtered_dict(feature_pars)
         with open(current_word_path, 'rb') as f:
-            common_terms = pickle.load(f)
+                common_terms = pickle.load(f)
+#         print("common_terms: ")
+#         print(common_terms[:5])
+#         print()
+#         print(train_trend.columns)
         train_trend = train_trend[common_terms]
         valid_trend = valid_trend[common_terms]
     else:

@@ -123,7 +123,9 @@ def extract_file(config_path, test_data_path):
                              search_lag, 'no'] + result_scores
             record_pd = write_report(result_scores, record_pd, row_count)
             row_count += 1
-        city_pred_result.to_csv(city_res_save_path, index=False, header=True)
+            
+        if city != 'all':
+            city_pred_result.to_csv(city_res_save_path, index=False, header=True)
 
     if not os.path.exists(report_pardir):
         os.makedirs(report_pardir)
