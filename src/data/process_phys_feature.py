@@ -17,7 +17,7 @@ import ast
 import os
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, add_quadratic_terms, add_heat_index
+from src.data.utils import read_raw_data, add_quadratic_terms, add_heat_index, create_folder_exist
 from configparser import ExtendedInterpolation
 
 @click.command()
@@ -31,6 +31,8 @@ def extract_file(config_path, phys_file_path, output_filepath):
     pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
+    # create folder if not exit
+    create_folder_exist(os.path.dirname(output_filepath))
     city_list = ast.literal_eval(pars['global']['city'])
 
     # column names for physical measurement features

@@ -91,6 +91,44 @@ predict_model:
 predict_fine_tuning:
 	$(PYTHON_INTERPRETER) src/evaluation/predict_fine_tuning.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
 
+
+##########
+# variable to run train_test_split on unit test data
+##########
+# unit_test_config
+UNIT_CONFIG_PATH = config/unit_test.ini
+
+UNIT_TRAIN_DATA_PATH = data/processed/unit_test/train.csv
+UNIT_VALID_DATA_PATH = data/processed/unit_test/valid.csv
+UNIT_TEST_DATA_PATH = data/processed/unit_test/test.csv
+
+# process physical measurements features
+data/external/unit_test/process_phys.csv:
+	$(PYTHON_INTERPRETER) src/data/process_phys_feature.py $(UNIT_CONFIG_PATH) data/external/unit_test/phys.csv $@
+
+# merge all data
+data/interim/unit_test/merged.csv:
+	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(UNIT_CONFIG_PATH) data/external/unit_test/pol.csv data/external/unit_test/search.csv data/external/unit_test/process_phys.csv $@
+
+# train test split into files
+unit_train_test_split: data/interim/unit_test/merged.csv
+	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(UNIT_CONFIG_PATH) $< $(UNIT_TRAIN_DATA_PATH) $(UNIT_VALID_DATA_PATH) $(UNIT_TEST_DATA_PATH)
+
+# unit test on build features
+unit_build_features:
+	$(PYTHON_INTERPRETER) src/features/build_features.ut.py -v $(UNIT_CONFIG_PATH) $(UNIT_TRAIN_DATA_PATH)
+
+
+
+
+
+
+
+
+
+
+
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

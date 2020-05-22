@@ -18,7 +18,7 @@ import os
 from configparser import ExtendedInterpolation
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, select_years, get_city_output_path, outer_concatenate
+from src.data.utils import read_raw_data, select_years, get_city_output_path, outer_concatenate, read_query_from_file
 
 
 @click.command()
@@ -45,7 +45,8 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     test_years = ast.literal_eval(pars['global']['test_year'])
     # seed word list
     seed_path = pars['extract_search_trend']['term_list_path']
-    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
+    seed_word_list = read_query_from_file(seed_path)
+
     seed_word_list.append('DATE')
     # pol label list
     label_columns = ast.literal_eval(pars['extract_pol_label']['y_column_name'])

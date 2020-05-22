@@ -18,7 +18,7 @@ import pandas as pd
 import ast
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, normalize_column
+from src.data.utils import read_raw_data, normalize_column, create_folder_exist
 
 
 @click.command()
@@ -34,10 +34,12 @@ def extract_file(config_path, pol_path, search_path, process_phys_path, output_f
     pars = configparser.ConfigParser()
     pars.read(config_path)
 
+    # create output folder
+    create_folder_exist(os.path.dirname(output_filepath))
     city_list = ast.literal_eval(pars['global']['city'])
 
     # re-direct search path 
-    search_path = pars['merge_data_files'][pars['merge_data_files']['search_data_source']]
+    # search_path = pars['merge_data_files'][pars['merge_data_files']['search_data_source']]
     
     input_pol_name = '_' + os.path.basename(pol_path)
     input_search_name = '_' + os.path.basename(search_path)
@@ -65,9 +67,10 @@ def extract_file(config_path, pol_path, search_path, process_phys_path, output_f
         output_df = pd.merge(output_df, process_phys_data, left_index=True, right_index=True, how='left',
                              indicator=False)
         output_df.to_csv(output_single_file_path, index=False)
-
     # create merged.csv to check existence
     open(output_filepath, 'w').close()
+
+
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)

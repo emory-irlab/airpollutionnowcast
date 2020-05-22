@@ -8,7 +8,6 @@
 import os
 import pickle
 import sys
-from typing import List
 
 sys.path.append('.')
 from src.data import read_raw_data
@@ -34,19 +33,6 @@ RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'ci
                   'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
 
-# read data and process to features
-def process_features(train_data_path, seq_length, search_lag):
-    train_data = read_raw_data(train_data_path)
-    y_data, pol_val, trend_fea, phys_fea = process_data(train_data)
-    processed_pol = get_pol_value_series(pol_val, seq_length)
-    processed_trend = lag_search_features(trend_fea, search_lag)
-    phys_fea = lag_search_features(phys_fea, 0)
-    # fill NAs with 0 for phys_fea
-    phys_fea.fillna(0, inplace=True)
-    process_phys = np.array(phys_fea)
-    return y_data, processed_pol, process_phys, processed_trend
-
-
 # get random forest model
 def get_rf_model(pars):
     # parameters for rf model
@@ -54,15 +40,6 @@ def get_rf_model(pars):
     max_depth = pars['max_depth']
     model = RandomForestModel(n_estimators, max_depth)
     return model
-
-
-def get_two_branch_feature(seq_length, first_branch, second_branch):
-    x_train_sensor, embedding_sensor = get_feature_array(first_branch, seq_length)
-    x_train_trend, embedding_trend = get_feature_array(second_branch, seq_length)
-
-    x_train = (x_train_sensor, x_train_trend)
-    embedding = (embedding_sensor, embedding_trend)
-    return x_train, embedding
 
 
 def get_lstm_model(feature_pars, embedding_dim, model_type):
@@ -119,42 +96,6 @@ def get_model_from_config(feature_pars, model_type, embedding_dim):
     elif model_type in ['lstm', 'dllstm', 'mtlstm', 'mtdllstm']:
         model = get_lstm_model(feature_pars, embedding_dim, model_type)
     return model
-
-
-def get_feature_from_config(pars, train_pol, train_phys, train_trend):
-    is_two_branch = pars['is_two_branch']
-    seq_length = pars['seq_length']
-
-    if is_two_branch:
-        first_feature = get_feature_from_code(pars['first_branch'], train_pol, train_phys, train_trend)
-        second_feature = get_feature_from_code(pars['second_branch'], train_pol, train_phys, train_trend)
-        x_train, embedding_dim = get_two_branch_feature(seq_length, first_feature, second_feature)
-    else:
-        code_feature: List[int] = pars['first_branch']
-        feature_list = get_feature_from_code(code_feature, train_pol, train_phys, train_trend)
-        x_train, embedding_dim = get_feature_array(feature_list, seq_length)
-    return x_train, embedding_dim
-
-
-def get_feature_from_code(feature_code, train_pol, train_phys, train_trend):
-    """
-
-    :param feature_code: list(int0
-        shape: 3 (pol, phys, trend0
-        0 for not including, 1 for including
-    :param train_pol:
-    :param train_phys:
-    :param train_trend:
-    :return: list(np.array)
-    """
-    output_feature = []
-    list_feature = [train_pol, train_phys, train_trend]
-
-    for i in range(3):
-        if feature_code[i] == 1:
-            output_feature.append(list_feature[i])
-
-    return output_feature
 
 
 def get_feature_pars(pars, index):
@@ -243,69 +184,6 @@ def result_stat(y_true, y_prediction, pred_score):
 def write_report(result_scores, record_pd, index):
     record_pd.loc[index, RECORD_COLUMNS] = result_scores
     return record_pd
-
-
-"""
-Function for DLLSTM
-"""
-
-
-def generate_dllstm_filtered_dict(pars):
-    # get common terms
-    current_word_path = pars['current_word_path']
-    # check for filtered_dict_path
-    filtered_dict_path = pars['filtered_dict_path']
-    search_terms_dict_path = pars['search_terms_dict_path']
-    seed_word_path = pars['seed_word_path']
-    input_data_path = pars['input_data_path']
-    search_volume_df = read_raw_data(input_data_path)
-    with open(search_terms_dict_path, 'rb') as f:
-        a = pickle.load(f)
-    SEED = True
-    if SEED:
-        seed_word_path = seed_word_path
-        seed_word_list = [k.lower() for k in pd.read_csv(seed_word_path, header=None)[0].values]
-        terms = []
-        for c in seed_word_list:
-            if c in a.keys() and c in search_volume_df.columns:
-                terms.append(c)
-    else:
-        terms = []
-        for c in a.keys():
-            if c in search_volume_df.columns:
-                terms.append(c)
-    # print(search_volume_df.shape, len(terms))
-    # Store a dictionary of terms currently in use and their glove embeddings.
-    terms = list(set(terms))
-    with open(filtered_dict_path, 'wb') as f:
-        pickle.dump({k: a[k] for k in terms}, f)
-    with open(current_word_path, 'wb') as f:
-        pickle.dump(terms, f)
-
-
-def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list):
-    model_type = feature_pars['model_type']
-
-    if model_type in ['dllstm', 'mtdllstm']:
-        # check for filtered_dict_path
-        filtered_dict_path = feature_pars['filtered_dict_path']
-        # get common terms
-        current_word_path = feature_pars['current_word_path']
-        if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
-            generate_dllstm_filtered_dict(feature_pars)
-        with open(current_word_path, 'rb') as f:
-                common_terms = pickle.load(f)
-#         print("common_terms: ")
-#         print(common_terms[:5])
-#         print()
-#         print(train_trend.columns)
-        train_trend = train_trend[common_terms]
-        valid_trend = valid_trend[common_terms]
-    else:
-        train_trend = train_trend[seed_word_list]
-        valid_trend = valid_trend[seed_word_list]
-
-    return train_trend, valid_trend
 
 
 """

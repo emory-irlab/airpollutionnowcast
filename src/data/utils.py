@@ -22,6 +22,20 @@ def read_global_pars(pars):
     return city_list, years, season, abs_data_path
 
 
+# read seed queries
+def read_query_from_file(seed_path):
+    seed_word_list = []
+    with open(seed_path, 'r') as fi:
+        line = fi.readline()
+        while line:
+            key_query = line.strip()
+            seed_word_list.append(key_query)
+#             print(key_query)
+            line = fi.readline()
+    seed_word_list.sort()
+    return seed_word_list
+
+
 def read_raw_data(raw_file_path, add_datetime=False, norm_col=False):
     trend_data = pd.read_csv(raw_file_path)
     if add_datetime:
@@ -260,7 +274,11 @@ Utils for merge_data_files.py
 
 # normalize the column
 def normalize_column(input_df):
-    output_df = (input_df - input_df.mean()) / input_df.std()
+    # if all columns are zero (no variance), no normalization (for unit test)
+    if np.round(input_df.std().sum(), decimals=15) != 0:
+        output_df = (input_df - input_df.mean()) / input_df.std()
+    else:
+        output_df = input_df.copy()
     return output_df
 
 """
@@ -280,7 +298,16 @@ def inner_concatenate(x_train_all, train_data):
     x_train_all = pd.concat([x_train_all, train_data], join='inner', ignore_index=True, sort=False)
     return x_train_all
 
+
 # get outter join
 def outer_concatenate(x_train_all, train_data):
     x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
     return x_train_all
+
+
+# create folder if not exist
+def create_folder_exist(file_save_folder):
+    if not os.path.exists(file_save_folder):
+        os.makedirs(file_save_folder)
+
+

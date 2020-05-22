@@ -12,7 +12,6 @@ import os
 sys.path.append('.')
 from src.data.utils import read_global_pars, extract_from_raw_data
 
-
 @click.command()
 @click.argument('config_path', type=click.Path(exists=True))
 @click.argument('output_filepath', type=click.Path())
