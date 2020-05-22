@@ -13,31 +13,25 @@ def get_glove(filtered_dict_path):
         print('glove shape: ', glove_embedding.shape)
         return glove_embedding
 
-# def get_intent():
-#     dict_path = '../intent.pick'
-#     word_path = '../current_terms.pick'
-# 
-#     with open(dict_path, 'rb') as f:
-#         dict_list  = pickle.load(f)
-# 
-#     with open(word_path, 'rb') as f:
-#         word_list  = pickle.load(f)
-#     
-#     vecs = np.array([d['vector'] for d in dict_list])
-#     words = np.array([d['query'] for d in dict_list])
-#     
-#     embed_dict = dict(zip(words, vecs))
-#     
-#     ordered_embed = []
-#     for word in word_list:
-#         ordered_embed.append(embed_dict[word])
-# 
-#     ordered_embed = np.array(ordered_embed)
+
+def get_wv_dict(wv_dict_path, current_word_path):
+    with open(wv_dict_path, 'rb') as fi:
+        wv_dict = pickle.load(fi)
+
+    with open(current_word_path, 'rb') as fi:
+        word_list = pickle.load(fi)
+
+    ordered_embed = []
+    for word in word_list:
+        ordered_embed.append(wv_dict[word])
+
+    ordered_embed = np.array(ordered_embed)
 #     print(ordered_embed.shape)
-#     return ordered_embed
+    return ordered_embed
 
 
 def get_glove_and_intent(filtered_dict_path, intent_dict_path, current_word_path):
+
     with open(filtered_dict_path, 'rb') as f:
         search_terms_dict = pickle.load(f)
 

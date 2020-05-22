@@ -35,7 +35,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
 
-    # create object for feature enginneer
+    # create object for feature engineer
     feature_engineer = FeatureEngineer()
 
     # get feature_pars dict

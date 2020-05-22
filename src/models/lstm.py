@@ -20,5 +20,3 @@ class LSTMModel(Model):
         net = Dropout(0.5)(net)
 
         return net
-
-

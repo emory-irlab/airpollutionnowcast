@@ -10,9 +10,10 @@ import click
 import pandas as pd
 import numpy as np
 sys.path.append('.')
-from src.evaluation.utils import process_features, result_stat, write_report, get_feature_from_config, \
+from src.evaluation.utils import result_stat, write_report, \
     get_model_from_config, get_feature_pars, RECORD_COLUMNS
-from src.data.utils import get_city_output_path
+from src.features.build_features import FeatureEngineer
+from src.data.utils import get_city_output_path, read_query_from_file
 
 
 @click.command()
@@ -31,12 +32,16 @@ def extract_file(config_path, test_data_path):
     # global parameters
     # seed word list
     seed_path = pars['extract_search_trend']['term_list_path']
-    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
+    seed_word_list = read_query_from_file(seed_path)
 
     seq_length = int(pars['train_model']['seq_length'])
     search_lag = int(pars['train_model']['search_lag'])
     # features_array = ast.literal_eval(pars['train_model']['FEATURE'])
     use_feature = ast.literal_eval(pars['train_model']['use_feature'])
+
+    # create object for feature engineer
+    feature_engineer = FeatureEngineer()
+
     # report path
     report_path = pars['predict_model']['report_path']
     # write results
@@ -87,7 +92,8 @@ def extract_file(config_path, test_data_path):
             model_type = feature_pars['model_type']
             # save input_data_path for dllstm model
             feature_pars['input_data_path'] = test_data_path
-            y_test, test_pol, test_phys, test_trend = process_features(test_data_path, seq_length, search_lag)
+            y_test, test_pol, test_phys, test_trend = feature_engineer.feature_from_file(test_data_path,
+                                                                                         seq_length, search_lag)
 
             # record city result
             if not city_res_record_conc:
@@ -104,7 +110,8 @@ def extract_file(config_path, test_data_path):
             else:
                 test_trend = test_trend[seed_word_list]
 
-            x_test, embedding_dim = get_feature_from_config(feature_pars, test_pol, test_phys, test_trend)
+            x_test, embedding_dim = feature_engineer.create_feature_sequence(feature_pars,
+                                                                             test_pol, test_phys, test_trend)
 
             model = get_model_from_config(feature_pars, model_type, embedding_dim)
             # build model
