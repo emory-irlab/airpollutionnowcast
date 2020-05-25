@@ -10,6 +10,7 @@ from typing import List
 import os
 import pickle
 from src.data.utils import read_raw_data
+from src.data.utils import read_query_from_file, create_folder_exist
 
 
 class FeatureEngineer(object):
@@ -218,7 +219,7 @@ def generate_dllstm_filtered_dict(pars):
     SEED = True
     if SEED:
         seed_word_path = seed_word_path
-        seed_word_list = [k.lower() for k in pd.read_csv(seed_word_path, header=None)[0].values]
+        seed_word_list = read_query_from_file(seed_word_path)
         terms = []
         for c in seed_word_list:
             if c in a.keys() and c in search_volume_df.columns:
@@ -231,6 +232,9 @@ def generate_dllstm_filtered_dict(pars):
     # print(search_volume_df.shape, len(terms))
     # Store a dictionary of terms currently in use and their glove embeddings.
     terms = list(set(terms))
+    # create folder
+    create_folder_exist(os.path.dirname(filtered_dict_path))
+    create_folder_exist(os.path.dirname(current_word_path))
     with open(filtered_dict_path, 'wb') as f:
         pickle.dump({k: a[k] for k in terms}, f)
     with open(current_word_path, 'wb') as f:
@@ -240,7 +244,7 @@ def generate_dllstm_filtered_dict(pars):
 def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list):
     model_type = feature_pars['model_type']
 
-    if model_type in ['dllstm', 'mtdllstm']:
+    if model_type in ['dllstm', 'mtdllstm', 'wvlstm']:
         # check for filtered_dict_path
         filtered_dict_path = feature_pars['filtered_dict_path']
         # get common terms
@@ -248,7 +252,7 @@ def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_li
         if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
             generate_dllstm_filtered_dict(feature_pars)
         with open(current_word_path, 'rb') as f:
-                common_terms = pickle.load(f)
+            common_terms = pickle.load(f)
 #         print("common_terms: ")
 #         print(common_terms[:5])
 #         print()

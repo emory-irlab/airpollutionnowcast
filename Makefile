@@ -120,6 +120,10 @@ unit_build_features:
 
 
 
+#########
+# variable to run train model on word vectors (without dict training)
+WV_CONFIG_PATH = config/word_vector.ini
+
 
 
 
