@@ -82,7 +82,7 @@ def extract_file(config_path, train_data_path, valid_data_path):
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+    # os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
     if tf.test.gpu_device_name():
         print('GPU found')
