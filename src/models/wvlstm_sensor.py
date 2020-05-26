@@ -49,7 +49,8 @@ class ComposedWVLSTM(LSTMModel):
         batch_seq = tf.reshape(search_input, [-1, self.embedding_dim_2])
         # multiply
         batch_new_seq = tf.matmul(batch_seq, new_embedding)
-        new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, hidden_dim])
+
+        new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, word_embedding_dim])
         # return result of search branch
         out_1 = self.shared_module(new_search_seq, return_seq)
 
