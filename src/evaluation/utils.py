@@ -28,6 +28,7 @@ from src.models.multitask_lstm import MTLSTM
 from src.models.multitask_dllstm import MTDLLSTM
 import ast
 import logging
+from src.models.embedding_utils import get_wv_dict
 
 RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'city_fine_tuning', 'accuracy', 'F1 score', 'true positives',
                   'false positives', 'true negatives',
@@ -89,6 +90,13 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
 
 
 def get_model_from_config(feature_pars, model_type, embedding_dim):
+
+    if model_type == 'wvlstm':
+        ordered_embed = get_wv_dict(feature_pars['filtered_dict_path'], feature_pars['current_word_path'])
+        print(ordered_embed.shape)
+        feature_pars['n_words'] = ordered_embed.shape[0]
+        feature_pars['word_embedding_dim'] = ordered_embed.shape[1]
+
     if model_type == 'rf':
         model = get_rf_model(feature_pars)
     elif model_type == 'lr':
