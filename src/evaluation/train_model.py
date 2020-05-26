@@ -11,6 +11,7 @@ import click
 from src.evaluation.utils import get_model_from_config, get_feature_pars
 from src.data.utils import read_query_from_file
 from src.features.build_features import FeatureEngineer
+import tensorflow as tf
 
 
 @click.command()
@@ -81,6 +82,12 @@ def extract_file(config_path, train_data_path, valid_data_path):
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(level=logging.INFO, format=log_fmt)
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+    if tf.test.gpu_device_name():
+        print('GPU found')
+    else:
+        print("No GPU found")
 
     extract_file()
 
