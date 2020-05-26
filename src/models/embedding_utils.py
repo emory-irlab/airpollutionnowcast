@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+from src.data.utils import read_query_from_file
 
 
 def get_glove(filtered_dict_path):
@@ -18,8 +19,7 @@ def get_wv_dict(wv_dict_path, current_word_path):
     with open(wv_dict_path, 'rb') as fi:
         wv_dict = pickle.load(fi)
 
-    with open(current_word_path, 'rb') as fi:
-        word_list = pickle.load(fi)
+    word_list = read_query_from_file(current_word_path)
 
     ordered_embed = []
     for word in word_list:
@@ -42,8 +42,9 @@ def get_glove_and_intent(filtered_dict_path, intent_dict_path, current_word_path
     words = np.array([d['query'] for d in dict_list])
     
     embed_dict = dict(zip(words, vecs))
-    with open(current_word_path, 'rb') as f:
-        word_list = pickle.load(f)
+
+    word_list = read_query_from_file(current_word_path)
+
     # Ensure that word order in glove and intend embedding matches that of search interest data.
     ordered_embed = []
     for word in word_list:
