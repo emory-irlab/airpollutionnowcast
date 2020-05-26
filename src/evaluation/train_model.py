@@ -3,6 +3,7 @@ import configparser
 import logging
 import os
 import sys
+sys.path.append('.')
 from configparser import ExtendedInterpolation
 import pandas as pd
 
