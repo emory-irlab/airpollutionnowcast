@@ -22,6 +22,20 @@ def read_global_pars(pars):
     return city_list, years, season, abs_data_path
 
 
+# read seed queries
+def read_query_from_file(seed_path):
+    seed_word_list = []
+    with open(seed_path, 'r') as fi:
+        line = fi.readline()
+        while line:
+            key_query = line.strip()
+            seed_word_list.append(key_query)
+#             print(key_query)
+            line = fi.readline()
+    seed_word_list.sort()
+    return seed_word_list
+
+
 def read_raw_data(raw_file_path, add_datetime=False, norm_col=False):
     trend_data = pd.read_csv(raw_file_path)
     if add_datetime:
@@ -153,7 +167,6 @@ def common_selection(abs_data_path, input_file_path, name_pattern, city, season,
 def extract_from_raw_data(city_list, raw_select_columns, output_filepath, abs_data_path, search_data_path, name_pattern,
                           season, years):
     """
-
     :param city_list:
     :param raw_select_columns:
     :param output_filepath:
@@ -167,10 +180,15 @@ def extract_from_raw_data(city_list, raw_select_columns, output_filepath, abs_da
 
     single_file_name = '_' + os.path.basename(output_filepath)
 
+    # mark whether it's trend data
+    is_trend = False
+
     # if select columns not list
     if not isinstance(raw_select_columns, list):
         # Get seed_word_list
         seed_word_list = [k.lower() for k in pd.read_csv(raw_select_columns, header=None)[0].values]
+        # mark is_trend
+        is_trend = True
 
     for city in city_list:
         single_file_path = os.path.join(os.path.dirname(output_filepath), city + single_file_name)
@@ -180,7 +198,7 @@ def extract_from_raw_data(city_list, raw_select_columns, output_filepath, abs_da
         else:
             select_columns = raw_select_columns[:]
 
-        extract_single_city_data(select_columns, single_file_path, trend_data)
+        extract_single_city_data(select_columns, single_file_path, trend_data, is_trend)
     # create search.csv to check existence
     open(output_filepath, 'w').close()
 
@@ -190,21 +208,23 @@ Utils for extract_search_trend.py
 """
 
 
-def extract_single_city_data(select_columns, single_file_path, trend_data):
+def extract_single_city_data(select_columns, single_file_path, trend_data, is_trend):
     trend_data = trend_data[select_columns]
-    # replace those smaller than 0.1 as nan
-    log_df = trend_data.copy()
-    log_df = log_df.apply(lambda x: np.where(x < 0.1, [np.nan for k in range(len(x))], x))
 
-    # remove most NA columns
-    drop_constant_name = list(log_df.loc[:, log_df.count() < 18].columns)
-    # drop same values all time terms
-    drop_constant_name.extend(list(log_df.loc[:, log_df.std() < 2].columns))
-    if len(drop_constant_name) != 0:
-        print('========Drop Most NAs========')
-        print(drop_constant_name)
+    if is_trend:
+        # replace those smaller than 0.1 as nan
+        log_df = trend_data.copy()
+        log_df = log_df.apply(lambda x: np.where(x < 0.1, [np.nan for k in range(len(x))], x))
 
-    trend_data = trend_data.drop(set(drop_constant_name), axis=1)
+        # remove most NA columns
+        drop_constant_name = list(log_df.loc[:, log_df.count() < 18].columns)
+        # drop same values all time terms
+        drop_constant_name.extend(list(log_df.loc[:, log_df.std() < 2].columns))
+        if len(drop_constant_name) != 0:
+            print('========Drop Most NAs========')
+            print(drop_constant_name)
+
+        trend_data = trend_data.drop(set(drop_constant_name), axis=1)
     trend_data.to_csv(single_file_path)
 
 
@@ -254,7 +274,11 @@ Utils for merge_data_files.py
 
 # normalize the column
 def normalize_column(input_df):
-    output_df = (input_df - input_df.mean()) / input_df.std()
+    # if all columns are zero (no variance), no normalization (for unit test)
+    if np.round(input_df.std().sum(), decimals=15) != 0:
+        output_df = (input_df - input_df.mean()) / input_df.std()
+    else:
+        output_df = input_df.copy()
     return output_df
 
 """
@@ -273,3 +297,17 @@ def get_city_output_path(template_file_path, city):
 def inner_concatenate(x_train_all, train_data):
     x_train_all = pd.concat([x_train_all, train_data], join='inner', ignore_index=True, sort=False)
     return x_train_all
+
+
+# get outter join
+def outer_concatenate(x_train_all, train_data):
+    x_train_all = pd.concat([x_train_all, train_data], ignore_index=True, sort=False)
+    return x_train_all
+
+
+# create folder if not exist
+def create_folder_exist(file_save_folder):
+    if not os.path.exists(file_save_folder):
+        os.makedirs(file_save_folder)
+
+

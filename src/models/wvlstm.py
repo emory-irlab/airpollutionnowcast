@@ -1,3 +1,9 @@
+'''
+    Author: Chen Lin
+    Email: chen.lin@emory.edu
+    Date created: 2020/5/21 
+    Python Version: 3.6
+'''
 import datetime
 import os
 
@@ -8,15 +14,15 @@ from tensorflow.keras.initializers import he_normal
 from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.models import Model as keras_Model
 
-from src.models.embedding_utils import get_glove_and_intent
+from src.models.embedding_utils import get_wv_dict
 from src.models.lstm import LSTMModel
 
 
-class DLLSTMModel(LSTMModel):
+class WVLSTM(LSTMModel):
 
     def build(self):
-        new_embedding_dim = 100 
         word_embedding_dim = 50 + 100
+        hidden_dim = 100
         n_words = 152
         return_seq = False
 
@@ -25,11 +31,11 @@ class DLLSTMModel(LSTMModel):
         search_input = Input(shape=(self.seq_length, self.embedding_dim))
 
         # Transform search interest data to incorporate term embeddings.
-        new_embedding = Dense(new_embedding_dim, kernel_initializer=he_normal(seed=11), activation='relu')(glove_embedding_input[0])
+        new_embedding = glove_embedding_input[0]
         batch_seq = tf.reshape(search_input, [-1, self.embedding_dim])
         batch_new_seq = tf.matmul(batch_seq, new_embedding)
-        batch_new_seq = Dense(new_embedding_dim, kernel_initializer=he_normal(seed=11), activation='relu')(batch_new_seq)
-        new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, new_embedding_dim])
+        batch_new_seq = Dense(hidden_dim, kernel_initializer=he_normal(seed=11), activation='relu')(batch_new_seq)
+        new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, hidden_dim])
 
         net = self.shared_module(new_search_seq, return_seq)
         out = Dense(1, activation='sigmoid', kernel_initializer=he_normal(seed=1))(net)
@@ -43,16 +49,16 @@ class DLLSTMModel(LSTMModel):
         self.current_word_path = pars['current_word_path']
 
     def fit(self, x_train, x_valid, y_train, y_valid):
-        
-        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
-        glove_embedding_tr = np.tile(glove_embedding, (x_train.shape[0],1 , 1))
-        glove_embedding_vl = np.tile(glove_embedding, (x_valid.shape[0],1 , 1))
+
+        glove_embedding = get_wv_dict(self.filtered_dict_path, self.current_word_path)
+        glove_embedding_tr = np.tile(glove_embedding, (x_train.shape[0], 1, 1))
+        glove_embedding_vl = np.tile(glove_embedding, (x_valid.shape[0], 1, 1))
         glove_embedding_trvl = np.tile(glove_embedding, (x_valid.shape[0] + x_train.shape[0],1 , 1))
 
         def arr_concate(train_arr, valid_arr):
-            return np.concatenate([train_arr, valid_arr], axis = 0)
+            return np.concatenate([train_arr, valid_arr], axis=0)
 
-        # concatenate the trian and valid inputs
+        # concatenate the train and valid inputs
         x_train_valid = arr_concate(x_train, x_valid)
 
         y_train_valid = arr_concate(y_train, y_valid)
@@ -81,7 +87,7 @@ class DLLSTMModel(LSTMModel):
         if es in callbacks:
             history = self.model.fit([glove_embedding_tr, x_train], y_train, batch_size=self.batch_size,
                                      epochs=max_epochs, validation_data=((glove_embedding_vl,x_valid), y_valid),
-                                     class_weight=class_weight, verbose=1, 
+                                     class_weight=class_weight, verbose=1,
                                      callbacks=callbacks, shuffle=True)
             epochs = max(len(history.epoch) - self.patience, min_epochs)
             # restore initial weights
@@ -95,9 +101,8 @@ class DLLSTMModel(LSTMModel):
                        epochs=epochs, class_weight=class_weight, verbose=1)
 
     def predict(self, x_test):
-        glove_embedding = get_glove_and_intent(self.filtered_dict_path, self.intent_dict_path, self.current_word_path)
-        glove_embedding_ts = np.tile(glove_embedding, (x_test.shape[0],1 , 1))
+        glove_embedding = get_wv_dict(self.filtered_dict_path, self.current_word_path)
+        glove_embedding_ts = np.tile(glove_embedding, (x_test.shape[0], 1, 1))
         pred_score = self.model.predict((glove_embedding_ts, x_test))
         pred_class = [0 if i < 0.5 else 1 for i in pred_score]
-
         return pred_class, pred_score

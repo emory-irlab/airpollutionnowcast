@@ -15,9 +15,10 @@ import click
 import ast
 import pandas as pd
 import os
+from configparser import ExtendedInterpolation
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, select_years, get_city_output_path, inner_concatenate
+from src.data.utils import read_raw_data, select_years, get_city_output_path, outer_concatenate, read_query_from_file
 
 
 @click.command()
@@ -35,7 +36,7 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     if not os.path.exists(save_pardir):
         os.makedirs(save_pardir)
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
     city_list = ast.literal_eval(pars['global']['city'])
@@ -44,7 +45,8 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     test_years = ast.literal_eval(pars['global']['test_year'])
     # seed word list
     seed_path = pars['extract_search_trend']['term_list_path']
-    seed_word_list = list(set([k.lower() for k in pd.read_csv(seed_path, header=None)[0].values]))
+    seed_word_list = read_query_from_file(seed_path)
+
     seed_word_list.append('DATE')
     # pol label list
     label_columns = ast.literal_eval(pars['extract_pol_label']['y_column_name'])
@@ -53,6 +55,7 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
     # concatenate the train and valid data
     x_train_all, x_valid_all, x_test_all = pd.DataFrame(columns=seed_word_list),\
                                            pd.DataFrame(columns=seed_word_list), pd.DataFrame(columns=seed_word_list)
+    place_holder_df = pd.DataFrame(columns=seed_word_list)
 
     for city in city_list:
         input_single_file_path = get_city_output_path(merged_file_path, city)
@@ -66,25 +69,26 @@ def extract_file(config_path, merged_file_path, train_data_path, valid_data_path
         train_data = select_years(merged_data, train_years)
         valid_data = select_years(merged_data, valid_years)
         test_data = select_years(merged_data, test_years)
+
+        train_data = outer_concatenate(place_holder_df, train_data)
+        valid_data = outer_concatenate(place_holder_df, valid_data)
+        test_data = outer_concatenate(place_holder_df, test_data)
+
         # save single city data
         train_data.to_csv(output_city_train_path, index=False)
         valid_data.to_csv(output_city_valid_path, index=False)
         test_data.to_csv(output_city_test_path, index=False)
 
-        if len(x_train_all) == 0:
-            x_train_all = train_data.copy()
-            x_valid_all = valid_data.copy()
-            x_test_all = test_data.copy()
-        else:
-            # concatenate data
-            x_train_all = inner_concatenate(x_train_all, train_data)
-            x_valid_all = inner_concatenate(x_valid_all, valid_data)
-            x_test_all = inner_concatenate(x_test_all, test_data)
+        # concatenate data
+        x_train_all = outer_concatenate(x_train_all, train_data)
+        x_valid_all = outer_concatenate(x_valid_all, valid_data)
+        x_test_all = outer_concatenate(x_test_all, test_data)
 
     # drop all NAs columns
-    x_train_all.dropna(axis=1, how='all', inplace=True)
-    x_valid_all.dropna(axis=1, how='all', inplace=True)
-    x_test_all.dropna(axis=1, how='all', inplace=True)
+    # this is not correct since some of them might two cities => cause NAs
+#     x_train_all.dropna(axis=1, how='all', inplace=True)
+#     x_valid_all.dropna(axis=1, how='all', inplace=True)
+#     x_test_all.dropna(axis=1, how='all', inplace=True)
 
     # create train.csv, test.csv to check existence
     x_train_all.to_csv(train_data_path, index=False)

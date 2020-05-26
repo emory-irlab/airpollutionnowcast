@@ -36,7 +36,7 @@ class Model(object):
         with tf.name_scope('Model'):
             self.model = self.build()
             self.model.compile(optimizer=Adam(lr=self.learning_rate),
-                               loss=FocalLoss(alpha=.25, gamma=2),
+                               loss='binary_crossentropy',
                                metrics=['accuracy', f1, TrueNegatives(),
                                         FalseNegatives(), TruePositives(),
                                         FalsePositives()])

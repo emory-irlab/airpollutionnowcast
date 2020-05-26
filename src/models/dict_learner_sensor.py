@@ -17,7 +17,7 @@ class ComposedDLLSTMModel(LSTMModel):
     def build(self):
         new_embed_dim = 100 
         glove_dim = 100 + 50
-        n_words = 51
+        n_words = 152
         return_seq = False
 
         self.embedding_dim_1, self.embedding_dim_2 = self.embedding_dim

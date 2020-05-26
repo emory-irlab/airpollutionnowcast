@@ -17,8 +17,8 @@ import ast
 import os
 
 sys.path.append('.')
-from src.data.utils import read_raw_data, add_quadratic_terms, add_heat_index
-
+from src.data.utils import read_raw_data, add_quadratic_terms, add_heat_index, create_folder_exist
+from configparser import ExtendedInterpolation
 
 @click.command()
 @click.argument('config_path', type=click.Path(exists=True))
@@ -28,9 +28,11 @@ def extract_file(config_path, phys_file_path, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('making interim physical measurements data from raw data')
 
-    pars = configparser.ConfigParser()
+    pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
+    # create folder if not exit
+    create_folder_exist(os.path.dirname(output_filepath))
     city_list = ast.literal_eval(pars['global']['city'])
 
     # column names for physical measurement features
@@ -47,7 +49,7 @@ def extract_file(config_path, phys_file_path, output_filepath):
         phys_data = read_raw_data(input_single_file_path)
 
         process_phys = add_quadratic_terms(phys_data, TEMP_MAX_COLUMN_NAME, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
-        process_phys = add_heat_index(process_phys, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
+        # process_phys = add_heat_index(process_phys, TEMP_MEAN_COLUMN_NAME, RH_MEAN_COLUMN_NAME)
 
         # index is int instead of datetime, this index set to false
         process_phys.to_csv(output_single_file_path, index=False)
