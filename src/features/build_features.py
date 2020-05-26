@@ -10,7 +10,7 @@ from typing import List
 import os
 import pickle
 from src.data.utils import read_raw_data
-from src.data.utils import read_query_from_file, create_folder_exist
+from src.data.utils import read_query_from_file, create_folder_exist, save_query_to_file
 
 
 class FeatureEngineer(object):
@@ -216,29 +216,24 @@ def generate_dllstm_filtered_dict(pars):
     search_volume_df = read_raw_data(input_data_path)
     with open(search_terms_dict_path, 'rb') as f:
         a = pickle.load(f)
-    SEED = True
-    if SEED:
-        seed_word_path = seed_word_path
-        seed_word_list = read_query_from_file(seed_word_path)
-        terms = []
-        for c in seed_word_list:
-            if c in a.keys() and c in search_volume_df.columns:
-                terms.append(c)
-    else:
-        terms = []
-        for c in a.keys():
-            if c in search_volume_df.columns:
-                terms.append(c)
+
+    seed_word_path = seed_word_path
+    seed_word_list = read_query_from_file(seed_word_path)
+    terms = []
+    for c in seed_word_list:
+        if c in a.keys() and c in search_volume_df.columns:
+            terms.append(c)
+
     # print(search_volume_df.shape, len(terms))
     # Store a dictionary of terms currently in use and their glove embeddings.
     terms = list(set(terms))
+    terms.sort()
     # create folder
     create_folder_exist(os.path.dirname(filtered_dict_path))
     create_folder_exist(os.path.dirname(current_word_path))
     with open(filtered_dict_path, 'wb') as f:
         pickle.dump({k: a[k] for k in terms}, f)
-    with open(current_word_path, 'wb') as f:
-        pickle.dump(terms, f)
+    save_query_to_file(terms, current_word_path)
 
 
 def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_list):
@@ -251,8 +246,8 @@ def if_create_filtered_dict(feature_pars, train_trend, valid_trend, seed_word_li
         current_word_path = feature_pars['current_word_path']
         if not (os.path.exists(filtered_dict_path) and os.path.exists(current_word_path)):
             generate_dllstm_filtered_dict(feature_pars)
-        with open(current_word_path, 'rb') as f:
-            common_terms = pickle.load(f)
+
+        common_terms = read_query_from_file(current_word_path)
 #         print("common_terms: ")
 #         print(common_terms[:5])
 #         print()

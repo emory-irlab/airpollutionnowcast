@@ -100,15 +100,8 @@ def extract_file(config_path, test_data_path):
                 city_pred_result['pol_label'] = np.array(y_test).reshape(-1)
                 city_res_record_conc = True
 
-            # design for dllstm model
-            if model_type == 'dllstm':
-                # get common terms
-                current_word_path = feature_pars['current_word_path']
-                with open(current_word_path, 'rb') as f:
-                    common_terms = pickle.load(f)
-                test_trend = test_trend[common_terms]
-            else:
-                test_trend = test_trend[seed_word_list]
+            # check if dllstm model, create filtered dict
+            test_trend, _ = feature_engineer.match_query_order(feature_pars, test_trend, test_trend, seed_word_list)
 
             x_test, embedding_dim = feature_engineer.create_feature_sequence(feature_pars,
                                                                              test_pol, test_phys, test_trend)

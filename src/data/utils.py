@@ -9,6 +9,7 @@ import pandas as pd
 import datetime as dt
 import ast
 import numpy as np
+import random
 
 
 def read_global_pars(pars):
@@ -24,6 +25,7 @@ def read_global_pars(pars):
 
 # read seed queries
 def read_query_from_file(seed_path):
+
     seed_word_list = []
     with open(seed_path, 'r') as fi:
         line = fi.readline()
@@ -32,8 +34,19 @@ def read_query_from_file(seed_path):
             seed_word_list.append(key_query)
 #             print(key_query)
             line = fi.readline()
+    random.seed(2020)
     seed_word_list.sort()
     return seed_word_list
+
+
+# save queries to file
+def save_query_to_file(query_terms, query_terms_path):
+    with open(query_terms_path, 'w') as fo:
+        for query in query_terms:
+            fo.write(query)
+            fo.write('\n')
+
+    return
 
 
 def read_raw_data(raw_file_path, add_datetime=False, norm_col=False):
