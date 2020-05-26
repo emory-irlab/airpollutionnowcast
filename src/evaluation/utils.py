@@ -76,7 +76,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
         if two_branch:
             model = None
         else:
-            model = WVLSTM(**kwargs)
+            model = WVLSTM(feature_pars['n_words'], feature_pars['word_embedding_dim'], **kwargs)
         model.get_glove_and_intent_path(feature_pars)
     elif model_type == 'mtdllstm':
         if two_branch:

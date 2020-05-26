@@ -20,10 +20,18 @@ from src.models.lstm import LSTMModel
 
 class WVLSTM(LSTMModel):
 
+    def __init__(self, n_words, word_embedding_dim, *args, **kwargs):
+        print(n_words)
+        print(word_embedding_dim)
+        self.word_embedding_dim = word_embedding_dim
+        self.n_words = n_words
+
+        super(WVLSTM, self).__init__(*args, **kwargs)
+
     def build(self):
-        word_embedding_dim = 50 + 100
+        word_embedding_dim = self.word_embedding_dim
+        n_words = self.n_words
         hidden_dim = 100
-        n_words = 152
         return_seq = False
 
         # Model inputs.

@@ -11,6 +11,7 @@ import click
 from src.evaluation.utils import get_model_from_config, get_feature_pars
 from src.data.utils import read_query_from_file
 from src.features.build_features import FeatureEngineer
+from src.models.embedding_utils import get_wv_dict
 
 
 @click.command()
@@ -59,6 +60,12 @@ def extract_file(config_path, train_data_path, valid_data_path):
 
         x_train, embedding_dim = feature_engineer.create_feature_sequence(feature_pars, train_pol, train_phys, train_trend)
         x_valid, _ = feature_engineer.create_feature_sequence(feature_pars, valid_pol, valid_phys, valid_trend)
+
+        if model_type == 'wvlstm':
+            ordered_embed = get_wv_dict(feature_pars['filtered_dict_path'], feature_pars['current_word_path'])
+            print(ordered_embed.shape)
+            feature_pars['n_words'] = ordered_embed.shape[0]
+            feature_pars['word_embedding_dim'] = ordered_embed.shape[1]
 
         model = get_model_from_config(feature_pars, model_type, embedding_dim)
 
