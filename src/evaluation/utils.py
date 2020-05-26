@@ -23,6 +23,7 @@ from src.models.lstm import LSTMModel
 from src.models.dict_learner_sensor import ComposedDLLSTMModel
 from src.models.dict_learner import DLLSTMModel
 from src.models.wvlstm import WVLSTM
+from src.models.wvlstm_sensor import ComposedWVLSTM
 from src.models.multitask_learning import ComposedMTLSTM
 from src.models.multitask_lstm import MTLSTM
 from src.models.multitask_dllstm import MTDLLSTM
@@ -75,7 +76,7 @@ def get_lstm_model(feature_pars, embedding_dim, model_type):
             model = MTLSTM(**kwargs)
     elif model_type == 'wvlstm':
         if two_branch:
-            model = None
+            model = ComposedWVLSTM(feature_pars['n_words'], feature_pars['word_embedding_dim'], **kwargs)
         else:
             model = WVLSTM(feature_pars['n_words'], feature_pars['word_embedding_dim'], **kwargs)
         model.get_glove_and_intent_path(feature_pars)
