@@ -19,7 +19,7 @@ endif
 # VARIABLES                                                                       #
 #################################################################################
 
-CONFIG_PATH = config/parameters.ini
+#CONFIG_PATH = config/parameters.ini
 TRAIN_DATA_PATH = data/processed/train.csv
 VALID_DATA_PATH = data/processed/valid.csv
 TEST_DATA_PATH = data/processed/test.csv
@@ -55,41 +55,41 @@ requirements: test_environment
 # COMMANDS                                                                      #
 #################################################################################
 
-## extract search trends
-data/interim/search.csv:
-	$(PYTHON_INTERPRETER) src/data/extract_search_trend.py $(CONFIG_PATH) $@
-
-## extract pol labels
-data/interim/pol.csv:
-	$(PYTHON_INTERPRETER) src/data/extract_pol_label.py $(CONFIG_PATH) $@
-
-## extract physical measurements data
-data/interim/phys.csv:
-	$(PYTHON_INTERPRETER) src/data/extract_phys_meas.py $(CONFIG_PATH) $@
-
-## process physical measurements features
-data/interim/process_phys.csv: data/interim/phys.csv
-	$(PYTHON_INTERPRETER) src/data/process_phys_feature.py $(CONFIG_PATH) $< $@
-
-## merge all data
-data/interim/merged.csv: data/interim/pol.csv data/interim/search.csv data/interim/process_phys.csv
-	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(CONFIG_PATH) $^ $@
-
-## train test split into files
-train_test_split: data/interim/merged.csv
-	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(CONFIG_PATH) $< $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
-
-## train model
-train_model:
-	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH)
-
-## predict and get report
-predict_model: 
-	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
-
-## predict fine-tuning results
-predict_fine_tuning:
-	$(PYTHON_INTERPRETER) src/evaluation/predict_fine_tuning.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
+### extract search trends
+#data/interim/search.csv:
+#	$(PYTHON_INTERPRETER) src/data/extract_search_trend.py $(CONFIG_PATH) $@
+#
+### extract pol labels
+#data/interim/pol.csv:
+#	$(PYTHON_INTERPRETER) src/data/extract_pol_label.py $(CONFIG_PATH) $@
+#
+### extract physical measurements data
+#data/interim/phys.csv:
+#	$(PYTHON_INTERPRETER) src/data/extract_phys_meas.py $(CONFIG_PATH) $@
+#
+### process physical measurements features
+#data/interim/process_phys.csv: data/interim/phys.csv
+#	$(PYTHON_INTERPRETER) src/data/process_phys_feature.py $(CONFIG_PATH) $< $@
+#
+### merge all data
+#data/interim/merged.csv: data/interim/pol.csv data/interim/search.csv data/interim/process_phys.csv
+#	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(CONFIG_PATH) $^ $@
+#
+### train test split into files
+#train_test_split: data/interim/merged.csv
+#	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(CONFIG_PATH) $< $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
+#
+### train model
+#train_model:
+#	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH)
+#
+### predict and get report
+#predict_model:
+#	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
+#
+### predict fine-tuning results
+#predict_fine_tuning:
+#	$(PYTHON_INTERPRETER) src/evaluation/predict_fine_tuning.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
 
 
 ##########
@@ -122,7 +122,38 @@ unit_build_features:
 
 #########
 # variable to run train model on word vectors (without dict training)
-WV_CONFIG_PATH = config/word_vector.ini
+#########
+CONFIG_PATH = config/word_vector.ini
+
+## extract search trends
+data/interim/search.csv:
+	$(PYTHON_INTERPRETER) src/data/extract_search_trend.py $(CONFIG_PATH) $@
+
+## extract pol labels
+data/interim/pol.csv:
+	$(PYTHON_INTERPRETER) src/data/extract_pol_label.py $(CONFIG_PATH) $@
+
+## extract physical measurements data
+data/interim/phys.csv:
+	$(PYTHON_INTERPRETER) src/data/extract_phys_meas.py $(CONFIG_PATH) $@
+
+## process physical measurements features
+data/interim/process_phys.csv: data/interim/phys.csv
+	$(PYTHON_INTERPRETER) src/data/process_phys_feature.py $(CONFIG_PATH) $< $@
+
+## merge all data
+data/interim/merged.csv: data/interim/pol.csv data/interim/search.csv data/interim/process_phys.csv
+	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(CONFIG_PATH) $^ $@
+
+## train test split into files
+train_test_split: data/interim/merged.csv
+	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(CONFIG_PATH) $< $(TRAIN_DATA_PATH) $(VALID_DATA_PATH) $(TEST_DATA_PATH)
+
+## train model
+train_model:
+	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(CONFIG_PATH) $(TRAIN_DATA_PATH) $(VALID_DATA_PATH)
+
+
 
 
 
