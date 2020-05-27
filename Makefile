@@ -167,6 +167,53 @@ CONFIG_PATH = config/word_vector_seed_queries.ini
 
 
 
+#########
+# variable to run train model on word vectors (without dict training) and only on seed queries and on NO2 prediction
+#########
+
+NO2_CONFIG_PATH = config/NO2/word_vector_NO2.ini
+NO2_TRAIN_DATA_PATH = data/processed/NO2/train.csv
+NO2_VALID_DATA_PATH = data/processed/NO2/valid.csv
+NO2_TEST_DATA_PATH = data/processed/NO2/test.csv
+
+#change operations
+## extract pol labels
+data/interim/NO2/pol.csv:
+	$(PYTHON_INTERPRETER) src/data/extract_pol_label.py $(NO2_CONFIG_PATH) $@
+
+## merge all data
+data/interim/NO2/merged.csv: data/interim/NO2/pol.csv data/interim/search.csv data/interim/process_phys.csv
+	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(NO2_CONFIG_PATH) $^ $@
+
+## train test split into files
+NO2_train_test_split: data/interim/NO2/merged.csv
+	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(NO2_CONFIG_PATH) $< $(NO2_TRAIN_DATA_PATH) $(NO2_VALID_DATA_PATH) $(NO2_TEST_DATA_PATH)
+
+## train model
+NO2_train_model:
+	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(NO2_CONFIG_PATH) $(NO2_TRAIN_DATA_PATH) $(NO2_VALID_DATA_PATH)
+
+## predict and get report
+NO2_predict_model:
+	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(NO2_CONFIG_PATH) $(NO2_TEST_DATA_PATH)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
