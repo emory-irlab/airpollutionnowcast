@@ -14,7 +14,7 @@ import ast
 import os
 
 sys.path.append('.')
-from src.data.utils import read_global_pars, extract_from_raw_data
+from src.data.utils import read_global_pars, extract_from_raw_data, create_folder_exist
 from configparser import ExtendedInterpolation
 
 
@@ -28,6 +28,8 @@ def extract_file(config_path, output_filepath):
     pars = configparser.ConfigParser(interpolation=ExtendedInterpolation())
     pars.read(config_path)
 
+    # create folder
+    create_folder_exist(os.path.dirname(output_filepath))
     city_list, years, season, abs_data_path = read_global_pars(pars)
     name_pattern = pars['extract_pol_label']['name_pattern']
     pol_data_path = pars['extract_pol_label']['pol_data_path']
