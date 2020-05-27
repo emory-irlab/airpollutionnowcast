@@ -123,7 +123,7 @@ unit_build_features:
 #########
 # variable to run train model on word vectors (without dict training)
 #########
-CONFIG_PATH = config/word_vector.ini
+#CONFIG_PATH = config/word_vector.ini
 
 ## extract search trends
 data/interim/search.csv:
@@ -158,9 +158,12 @@ predict_model:
 	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(CONFIG_PATH) $(TEST_DATA_PATH)
 
 
+#########
+# variable to run train model on word vectors (without dict training) and only on seed queries
+#########
+CONFIG_PATH = config/word_vector_seed_queries.ini
 
-
-
+# all the operations makefile same above
 
 
 
