@@ -18,6 +18,7 @@ class ComposedDLLSTMModel(LSTMModel):
         new_embed_dim = 100 
         glove_dim = 100 + 50
         n_words = 152
+        hidden_dim = 100
         return_seq = False
 
         self.embedding_dim_1, self.embedding_dim_2 = self.embedding_dim
@@ -32,6 +33,9 @@ class ComposedDLLSTMModel(LSTMModel):
         search_input = Input(shape=(self.seq_length, self.embedding_dim_2))
         batch_seq = tf.reshape(search_input, [-1, self.embedding_dim_2])
         batch_new_seq = tf.matmul(batch_seq, new_embedding)
+        # add dense layer to the trained embedding
+        batch_new_seq = Dense(hidden_dim, kernel_initializer=he_normal(seed=11), activation='relu')(batch_new_seq)
+
         new_search_seq = tf.reshape(batch_new_seq, [-1, self.seq_length, new_embed_dim])
 
         out_1 = self.shared_module(new_search_seq, return_seq)
