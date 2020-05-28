@@ -202,7 +202,7 @@ NO2_predict_model:
 # variable to run train model on word vectors (without dict training) and only on seed queries and on PM25 prediction
 #########
 
-PM25_CONFIG_PATH = config/NO2/word_vector_PM25.ini
+PM25_CONFIG_PATH = config/PM25/word_vector_PM25.ini
 PM25_TRAIN_DATA_PATH = data/processed/PM25/train.csv
 PM25_VALID_DATA_PATH = data/processed/PM25/valid.csv
 PM25_TEST_DATA_PATH = data/processed/PM25/test.csv
