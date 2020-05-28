@@ -198,6 +198,39 @@ NO2_predict_model:
 	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(NO2_CONFIG_PATH) $(NO2_TEST_DATA_PATH)
 
 
+#########
+# variable to run train model on word vectors (without dict training) and only on seed queries and on PM25 prediction
+#########
+
+PM25_CONFIG_PATH = config/NO2/word_vector_PM25.ini
+PM25_TRAIN_DATA_PATH = data/processed/PM25/train.csv
+PM25_VALID_DATA_PATH = data/processed/PM25/valid.csv
+PM25_TEST_DATA_PATH = data/processed/PM25/test.csv
+
+#change operations
+## extract pol labels
+data/interim/PM25/pol.csv:
+	$(PYTHON_INTERPRETER) src/data/extract_pol_label.py $(PM25_CONFIG_PATH) $@
+
+## merge all data
+data/interim/PM25/merged.csv: data/interim/PM25/pol.csv data/interim/search.csv data/interim/process_phys.csv
+	$(PYTHON_INTERPRETER) src/data/merge_data_files.py $(PM25_CONFIG_PATH) $^ $@
+
+## train test split into files
+PM25_train_test_split: data/interim/PM25/merged.csv
+	$(PYTHON_INTERPRETER) src/data/train_test_split.py $(PM25_CONFIG_PATH) $< $(PM25_TRAIN_DATA_PATH) $(PM25_VALID_DATA_PATH) $(PM25_TEST_DATA_PATH)
+
+## train model
+PM25_train_model:
+	$(PYTHON_INTERPRETER) src/evaluation/train_model.py $(PM25_CONFIG_PATH) $(PM25_TRAIN_DATA_PATH) $(PM25_VALID_DATA_PATH)
+
+## predict and get report
+PM25_predict_model:
+	$(PYTHON_INTERPRETER) src/evaluation/predict_model.py $(PM25_CONFIG_PATH) $(PM25_TEST_DATA_PATH)
+
+
+
+
 
 
 
