@@ -11,9 +11,9 @@ import pandas as pd
 import numpy as np
 sys.path.append('.')
 from src.evaluation.utils import result_stat, write_report, \
-    get_model_from_config, get_feature_pars, RECORD_COLUMNS
+    get_model_from_config, get_feature_pars, RECORD_COLUMNS, TWO_BRANCH_VARIATION
 from src.features.build_features import FeatureEngineer
-from src.data.utils import get_city_output_path, read_query_from_file
+from src.data.utils import get_city_output_path, read_query_from_file, create_folder_exist
 
 
 @click.command()
@@ -45,7 +45,9 @@ def extract_file(config_path, test_data_path):
     # report path
     report_path = pars['predict_model']['report_path']
     # write results
-    report_pardir = os.path.dirname(report_path)
+    report_pardir = os.path.join(TWO_BRANCH_VARIATION,os.path.dirname(report_path))
+    create_folder_exist(report_pardir)
+    report_path = os.path.join(report_pardir, os.path.basename(report_path))
 
     # if appending results
     append_mode = pars['predict_model'].getboolean('append_mode')

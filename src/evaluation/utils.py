@@ -6,14 +6,10 @@
 '''
 
 import os
-import pickle
 import sys
 
 sys.path.append('.')
-from src.data import read_raw_data
-from src.features.build_features import process_data, get_pol_value_series, lag_search_features, get_feature_array
 import numpy as np
-import pandas as pd
 from sklearn.metrics import roc_curve, auc, confusion_matrix, f1_score, accuracy_score, \
     average_precision_score, precision_recall_curve
 from src.models.rf import RandomForestModel
@@ -28,13 +24,14 @@ from src.models.multitask_learning import ComposedMTLSTM
 from src.models.multitask_lstm import MTLSTM
 from src.models.multitask_dllstm import MTDLLSTM
 import ast
-import logging
 from src.models.embedding_utils import get_wv_dict
+from src.data.utils import create_folder_exist
 
 RECORD_COLUMNS = ['city', 'model', 'feature', 'is_two_branch', 'search_lag', 'city_fine_tuning', 'accuracy', 'F1 score', 'true positives',
                   'false positives', 'true negatives',
                   'false negatives', 'AUC', 'AP', 'Interpolated-AP']
 
+TWO_BRANCH_VARIATION = 'two_branch_variation'
 
 # get random forest model
 def get_rf_model(pars):
@@ -124,16 +121,19 @@ def get_feature_pars(pars, index):
     feature_pars['model_type'] = ast.literal_eval(pars['train_model']['model_type'])[index]
 
     # path parameters
-    feature_pars['log_dir'] = os.path.join(pars['train_model']['log_dir'],
+    feature_pars['log_dir'] = os.path.join(TWO_BRANCH_VARIATION, pars['train_model']['log_dir'],
                                            feature_pars['model_type'],
                                            feature_pars['feature'])
-    feature_pars['save_model_path'] = os.path.join(pars['train_model']['save_model_path'],
+    create_folder_exist(feature_pars['log_dir'])
+    feature_pars['save_model_path'] = os.path.join(TWO_BRANCH_VARIATION, pars['train_model']['save_model_path'],
                                                    feature_pars['model_type'],
                                                    feature_pars['feature'] + '.h5')
     # path for fine_tuning models
-    feature_pars['save_fine_tuning_path'] = os.path.join(pars['predict_fine_tuning']['save_fine_tuning_path'],
+    feature_pars['save_fine_tuning_path'] = os.path.join(TWO_BRANCH_VARIATION, pars['predict_fine_tuning']['save_fine_tuning_path'],
                                                          feature_pars['model_type'],
                                                          feature_pars['feature'] + '.h5')
+    create_folder_exist(feature_pars['log_dir'])
+    create_folder_exist(feature_pars['save_model_path'])
 
     # path for dlstm
     feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
