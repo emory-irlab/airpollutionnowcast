@@ -124,7 +124,7 @@ def get_feature_pars(pars, index):
     feature_pars['log_dir'] = os.path.join(TWO_BRANCH_VARIATION, pars['train_model']['log_dir'],
                                            feature_pars['model_type'],
                                            feature_pars['feature'])
-    create_folder_exist(feature_pars['log_dir'])
+
     feature_pars['save_model_path'] = os.path.join(TWO_BRANCH_VARIATION, pars['train_model']['save_model_path'],
                                                    feature_pars['model_type'],
                                                    feature_pars['feature'] + '.h5')
@@ -133,7 +133,7 @@ def get_feature_pars(pars, index):
                                                          feature_pars['model_type'],
                                                          feature_pars['feature'] + '.h5')
     create_folder_exist(feature_pars['log_dir'])
-    create_folder_exist(feature_pars['save_model_path'])
+    create_folder_exist(os.path.dirname(feature_pars['save_model_path']))
 
     # path for dlstm
     feature_pars['intent_dict_path'] = pars['DLLSTM']['intent_dict_path']
