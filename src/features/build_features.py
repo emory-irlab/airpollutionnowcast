@@ -15,6 +15,7 @@ def process_data(input_data):
     date_col_index = input_data.columns.get_loc("DATE")
     trend_fea = input_data.iloc[:, 2:date_col_index]
     phys_fea = input_data.iloc[:, date_col_index+1:]
+    trend_fea.index = input_data.iloc[:,date_col_index]
     return y, pol_val, trend_fea, phys_fea
 
 
@@ -56,7 +57,7 @@ def lag_search_features(input_df, lag):
         shape: N*M
         N: number of days
         M: number of search terms
-    :param lag: int
+    :param lag: int:
         lag of days applied ont search data
     :return: pd.DataFrame
         shape: N*M
@@ -67,6 +68,7 @@ def lag_search_features(input_df, lag):
                                 np.where(x.isnull(), [rnd() for k in range(len(x))], x))
     # record column names
     df_column_names = input_df.columns
+    df_index_names = input_df.index
     input_df = np.array(input_df)
     embedding_dim = input_df.shape[1]
     reveserse_embeddings = input_df[::-1]
@@ -75,7 +77,7 @@ def lag_search_features(input_df, lag):
         na_embedding = np.array([rnd() for k in range(embedding_dim)])
         lag_features[i] = na_embedding
     lag_features = lag_features[::-1]
-    return pd.DataFrame(lag_features, columns=df_column_names)
+    return pd.DataFrame(lag_features, columns=df_column_names, index = df_index_names)
 
 
 # generate sequence input features for LSTM training
