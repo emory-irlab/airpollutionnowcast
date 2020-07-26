@@ -91,6 +91,7 @@ def extract_file(config_path, test_data_path):
             #print("Head of test_trend, in order to save date")
             #print(test_trend.iloc[1:10,1:5])
 			
+            city_pred_result['date'] = np.array(test_trend.index)
             # record city result
             if not city_res_record_conc:
                 city_pred_result['pol_label'] = np.array(y_test).reshape(-1)
@@ -115,7 +116,6 @@ def extract_file(config_path, test_data_path):
 
             pred_class, pred_score = model.predict(x_test)
             # record city_res
-            city_pred_result['data'] = np.array(test_trend.index)
             city_pred_result[model_type+'-'+feature_pars['feature'] + '-index'] = np.array(pred_score).reshape(-1)
             city_pred_result[model_type+'-'+feature_pars['feature'] + '-label'] = np.array(pred_class).reshape(-1)            
 
